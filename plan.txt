@@ -1,0 +1,7 @@
+wam (for Wikipedia Asian Month)
+=====
+
+- For tracking users new articles
+  - Different Wikipedia
+- For judging
+  - Judge login/logout --> OAuth?
