@@ -1,12 +1,9 @@
 wam (for Wikipedia Asian Month)
 =====
-
-- For tracking users new articles
-  - Different Wikipedia
-- For judging
-  - Judge login/logout --> OAuth?
+[Wikipedia Asian Month](https://meta.wikimedia.org/wiki/Wikipedia_Asian_Month) Tracking and Judging Tool.
 
 
+## Plans
 ### Tracking new articles of particpants
 - Need list of participating Wikipedia
 - Need a page on that local Wikipedia storing the list of participating users
@@ -26,3 +23,6 @@ wam (for Wikipedia Asian Month)
     + Judge will tick one checkbox if the article fulfills the criterion
     + Make it easy to judge: article shown in iframe while checklist floats around?
 
+### Others
+Do PHP unit testing if possible
+- https://phpunit.de/getting-started.html
