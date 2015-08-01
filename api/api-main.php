@@ -73,7 +73,7 @@ function get_meta_page () {
     // little processing
     $data = explode("</head>", $data)[1];
     $data = explode("<link>", $data)[0];
+    $data = str_replace("./", "https://meta.wikimedia.org/wiki/", $data);
 
     return $data;
 }
-get_meta_page();
