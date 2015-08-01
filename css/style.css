@@ -1,3 +1,6 @@
 body {
     padding-top: 70px;
 }
+main dl {
+    margin-left: 3em;
+}

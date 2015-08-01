@@ -1,4 +1,6 @@
-<!DOCTYPE html>
+<?php
+require_once("api/api-main.php");
+?><!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
@@ -24,7 +26,7 @@
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                     <ul class="nav navbar-nav">
                     <li class="active"><a href="#">Home</a></li>
-                    <li><a href="#">Link</a></li>
+                    <li><a href="https://meta.wikimedia.org/wiki/Talk:Wikipedia_Asian_Month">Talk page</a></li>
                     <li><a href="#">One more separated link</a></li>
                     </ul>
                     </li>
@@ -37,7 +39,7 @@
         </nav>
     </header>
     <main class="container">
-
+        <?php echo get_meta_page(); ?>
     </main>
     <footer class="container">
 

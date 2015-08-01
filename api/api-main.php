@@ -62,3 +62,18 @@ function get_page_size ($pageids = []) {
         );
     return json_decode(api_query($params), true);
 }
+
+function get_meta_page () {
+    $url = "http://rest.wikimedia.org:80/meta.wikimedia.org/v1/page/html/Wikipedia_Asian_Month";
+    $params = "";
+    $data = http_request($url, $params);
+    if (empty($data)) {
+        throw new Exception("No data received from server. Check that API is enabled.");
+    }
+    // little processing
+    $data = explode("</head>", $data)[1];
+    $data = explode("<link>", $data)[0];
+
+    return $data;
+}
+get_meta_page();
