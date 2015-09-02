@@ -20,28 +20,70 @@ $wiki = isset($_GET["wiki"]) ? $_GET["wiki"] : "";
     <main class="container">
         <?php
         if (!empty($username) && !empty($wiki)) {
+            $all_pages = get_all_new_pages_of_user($username, $wiki)['query']['usercontribs'];
+            $all_pageids = [];
+            for ($i = 0; $i < count($all_pages); $i++) {
+                array_push($all_pageids, $all_pages[$i]['pageid']);
+            }
+            $all_page_sizes = get_page_size($all_pageids, $wiki)['query']['pages'];
+            //echo json_encode($all_page_sizes);         
+            //echo json_encode($all_pages);
             ?>
-        <h2>Progress for User:<?= $username; ?> at <?= $wiki; ?></h2>
-        <?php echo json_encode(get_all_new_pages_of_user($username, $wiki)); ?>
+            <h2>Progress for <a href="//<?= $wiki ?>/wiki/User:<?= $username ?>"><?= $username ?></a> at <a href="//<?= $wiki ?>/wiki/"><?= $wiki; ?></a></h2>
+            <div class="table-responsive">
+                <table class="table">
+                <thead>
+                    <tr>
+                    <th>Article name</th>
+                    <th>Date and time</th>
+                    <th>Current byte count</th>
+                    <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php
+                    for ($i = 0; $i < count($all_pages); $i++) {
+                    ?>
+                    <tr>
+                        <td><a href="//<?= $wiki ?>/wiki/<?= $all_pages[$i]['title'] ?>"><?= $all_pages[$i]['title'] ?></a></td>
+                        <td><?= date("j F Y, H:i:s", strtotime($all_pages[$i]['timestamp'])) ?></td>
+                        <td><?= $all_page_sizes[$all_pages[$i]['pageid']]['revisions'][0]['size'] ?></td>
+                        <td><!-- <?= $all_pages[$i]['pageid'] ?> --><span class="label label-warning">Pending</span></td>
+                    </tr>
+                    <?php
+                    }
+                ?>
+                </tbody>
+                </table>
+            </div>
         <?php
         } else {
-        echo json_encode(get_participants_list());
+        $participants = get_participants_list();
         ?>
-        <form class="form-horizontal" method="GET">
-        <div class="form-group">
-            <label for="username" class="col-sm-2 control-label">Username:</label>
-            <div class="col-sm-10">
-            <input type="text" class="form-control" name="username" id="username" placeholder="Username (e.g. Jimmy_Wales)">
-            </div>
+        <div class="table-responsive">
+            <table class="table">
+            <thead>
+                <tr>
+                <th>Username</th>
+                <th>Wiki</th>
+                <th>&nbsp;</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php
+                for ($i = 0; $i < count($participants); $i++) {
+                ?>
+                <tr>
+                    <td><a href="//<?= $participants[$i]['wiki'] ?>/wiki/User:<?= $participants[$i]['username'] ?>"><?= $participants[$i]['username'] ?></a></td>
+                    <td><a href="//<?= $participants[$i]['wiki'] ?>/wiki/"><?= $participants[$i]['wiki'] ?></a></td>
+                    <td><a class="btn btn-default btn-xs" href="progress.php?username=<?= $participants[$i]['username'] ?>&amp;wiki=<?= $participants[$i]['wiki'] ?>">Check progress</a></td>
+                </tr>
+                <?php
+                }
+            ?>
+            </tbody>
+            </table>
         </div>
-        <div class="form-group">
-            <label for="wiki" class="col-sm-2 control-label">Wiki:</label>
-            <div class="col-sm-10">
-            <input type="text" class="form-control" name="wiki" id="wiki" placeholder="Wiki (e.g. id.wikipedia.org)">
-            </div>
-        </div>
-        <button type="submit" class="btn btn-default">Submit</button>
-        </form>
         <?php
         }
         ?>

@@ -62,6 +62,7 @@ function get_page_content ($pageids = [], $wiki = "meta.wikimedia.org") {
  * @return [type]         [description]
  */
 function get_page_size ($pageids = [], $wiki = "meta.wikimedia.org") {
+    // TODO resolve issue of maximum 50 pageids
     $params = array(
         "action" => "query",
         "prop"   => "revisions",
@@ -111,7 +112,7 @@ function get_all_new_pages_of_user ($user = "", $wiki = "meta.wikimedia.org") {
 
 function get_participants_list() {
     // [[meta:Wikipedia_Asian_Month/Participants.json]]
-    $data = json_decode(get_page_content([8464575])['query']['pages'][8464575]['revisions'][0]['*']);
+    $data = json_decode(get_page_content([8464575])['query']['pages'][8464575]['revisions'][0]['*'], true);
     return $data;
 }
 
