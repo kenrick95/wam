@@ -107,3 +107,11 @@ function get_all_new_pages_of_user ($user = "", $wiki = "meta.wikimedia.org") {
 
     return $data;
 }
+
+
+function get_participants_list() {
+    // [[meta:Wikipedia_Asian_Month/Participants.json]]
+    $data = json_decode(get_page_content([8464575])['query']['pages'][8464575]['revisions'][0]['*']);
+    return $data;
+}
+

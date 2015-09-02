@@ -25,6 +25,7 @@ $wiki = isset($_GET["wiki"]) ? $_GET["wiki"] : "";
         <?php echo json_encode(get_all_new_pages_of_user($username, $wiki)); ?>
         <?php
         } else {
+        echo json_encode(get_participants_list());
         ?>
         <form class="form-horizontal" method="GET">
         <div class="form-group">
