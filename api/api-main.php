@@ -62,15 +62,30 @@ function get_page_content ($pageids = [], $wiki = "meta.wikimedia.org") {
  * @return [type]         [description]
  */
 function get_page_size ($pageids = [], $wiki = "meta.wikimedia.org") {
-    // TODO resolve issue of maximum 50 pageids
-    $params = array(
-        "action" => "query",
-        "prop"   => "revisions",
-        "format" => "json",
-        "rvprop" => "size",
-        "pageids" => implode("|", $pageids)
-        );
-    return json_decode(api_query($params, $wiki), true);
+    $data = null;
+    $cnt = 0;
+    while ($cnt * 50 < count($pageids)) {
+        $temp_pageids = array_slice($pageids, $cnt * 50, 50);
+
+        $cnt++;
+        $params = array(
+            "action" => "query",
+            "prop"   => "revisions",
+            "format" => "json",
+            "rvprop" => "size",
+            "pageids" => implode("|", $temp_pageids)
+            );
+        $temp_data = json_decode(api_query($params, $wiki), true);
+        if ($data === null)
+            $data = $temp_data;
+        else {
+            foreach ($temp_data['query']['pages'] as $key => $value) {
+                $data['query']['pages'][$key] = $temp_data['query']['pages'][$key];
+            }
+        }
+    }
+
+    return $data;
 }
 
 function get_meta_page () {
