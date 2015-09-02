@@ -33,3 +33,8 @@ function array_to_string($array, $join_elem, $join_kv) {
     }
     return implode($join_elem, $temp_arr);
 }
+
+function within_period ($time) {
+    global $settings;
+    return $settings['period']['start'] <= $time && $time <= $settings['period']['end'];
+}

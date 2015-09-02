@@ -18,6 +18,7 @@ function get_new_pages_of_user ($user = "", $wiki = "meta.wikimedia.org", $limit
     if (empty($limit)) {
         $limit = 500;   
     }
+    global $settings;
 
     $params = array(
         "action" => "query",
@@ -27,7 +28,11 @@ function get_new_pages_of_user ($user = "", $wiki = "meta.wikimedia.org", $limit
         "ucuser" => $user,
         "ucnamespace" => "0",
         "ucprop" => "ids|title|timestamp|flags",
-        "ucshow" => "new"
+        "ucshow" => "new",
+        "continue" => "",
+        "ucdir" => "newer",
+        "ucstart" => $settings['period']['start'],
+        "ucend" => $settings['period']['end']
         );
     if (!empty($uccontinue)) {
         $params['uccontinue'] = $uccontinue;
@@ -90,10 +95,6 @@ function get_all_new_pages_of_user ($user = "", $wiki = "meta.wikimedia.org") {
     while ($data === null /*|| $cnt < 10){// */|| isset($temp_data['continue'])) {
         $temp_data = get_new_pages_of_user($user, $wiki, 500, $uccontinue);
         $uccontinue = !empty($temp_data['continue']['uccontinue']) ? $temp_data['continue']['uccontinue'] : "";
-        // echo json_encode($temp_data);
-        // echo "\n\n";
-        // echo $uccontinue;
-        // echo "\n\n\n\n\n";
         if ($data === null)
             $data = $temp_data;
         else {
@@ -103,9 +104,6 @@ function get_all_new_pages_of_user ($user = "", $wiki = "meta.wikimedia.org") {
         }
         $cnt++;
     }
-    echo json_encode($data);
 
     return $data;
 }
-
-get_all_new_pages_of_user("Kenrick95", "id.wikipedia.org");
