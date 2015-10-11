@@ -10,10 +10,13 @@
 <tbody>
 <?php
     for ($i = 0; $i < count($participants); $i++) {
+        if (!empty($filter) && $participants[$i]['wiki'] !== $filter) {
+            continue;
+        }
     ?>
     <tr>
         <td><a href="//<?= $participants[$i]['wiki'] ?>/wiki/User:<?= $participants[$i]['username'] ?>"><?= $participants[$i]['username'] ?></a></td>
-        <td><a href="//<?= $participants[$i]['wiki'] ?>/wiki/"><?= $participants[$i]['wiki'] ?></a></td>
+        <td><a href="progress.php?filter=<?= $participants[$i]['wiki'] ?>"><?= $participants[$i]['wiki'] ?></a></td>
         <td><a class="btn btn-default btn-xs" href="progress.php?username=<?= $participants[$i]['username'] ?>&amp;wiki=<?= $participants[$i]['wiki'] ?>">Check progress</a></td>
     </tr>
     <?php
@@ -22,4 +25,4 @@
 </tbody>
 </table>
 </div>
-<strong>Not listed?</strong> Add yourself in at <a href="https://meta.wikimedia.org/wiki/Wikipedia_Asian_Month/Participants.json">this meta page</a>.
+<strong>Not listed?</strong> Add yourself in at <a href="https://meta.wikimedia.org/wiki/Wikipedia_Asian_Month/Participants">this meta-wiki page</a>.

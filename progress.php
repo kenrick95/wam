@@ -3,6 +3,7 @@ require_once("api/api-main.php");
 $_current_page = "progress";
 $username = isset($_GET["username"]) ? $_GET["username"] : "";
 $wiki = isset($_GET["wiki"]) ? $_GET["wiki"] : "";
+$filter = isset($_GET['filter']) ? $_GET['filter'] : '';
 
 ?><!DOCTYPE html>
 <html>
