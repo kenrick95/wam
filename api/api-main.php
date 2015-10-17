@@ -16,7 +16,7 @@ function api_query ($params, $wiki = "meta.wikimedia.org") {
 }
 function get_new_pages_of_user ($user = "", $wiki = "meta.wikimedia.org", $limit = 500, $uccontinue) {
     if (empty($limit)) {
-        $limit = 500;   
+        $limit = 500;
     }
     global $settings;
 
@@ -128,8 +128,8 @@ function get_all_new_pages_of_user ($user = "", $wiki = "meta.wikimedia.org") {
 function get_participants_list() {
     // [[meta:Wikipedia_Asian_Month/Participants]]
     $raw_data = get_page_content([8962039])['query']['pages'][8962039]['revisions'][0]['*'];
-    
-    preg_match_all("/{{#target:\s*User\:(\S+)\s*\|\s*(\S+)\s*}}/", $raw_data, $data);
+
+    preg_match_all("/{{target\s*\|\s*user\s*=\s*(\S+)\s*\|\s*site\s*=\s*(\S+)\s*}}/", $raw_data, $data);
     //var_dump($data);
     $ret = [];
     for ($i = 1; $i < count($data[2]); $i++) {
@@ -149,12 +149,12 @@ function get_participants_list() {
 /**
  * Utility function to sign a request
  *
- * Note this doesn't properly handle the case where a parameter is set both in 
+ * Note this doesn't properly handle the case where a parameter is set both in
  * the query string in $url and in $params, or non-scalar values in $params.
  *
  * @param string $method Generally "GET" or "POST"
  * @param string $url URL string
- * @param array $params Extra parameters for the Authorization header or post 
+ * @param array $params Extra parameters for the Authorization header or post
  *  data (if application/x-www-form-urlencoded).
  *Â @return string Signature
  */
@@ -169,7 +169,7 @@ function sign_request( $method, $url, $params = array() ) {
     $port = isset( $parts['port'] ) ? $parts['port'] : ( $scheme == 'https' ? '443' : '80' );
     $path = isset( $parts['path'] ) ? $parts['path'] : '';
     if ( ( $scheme == 'https' && $port != '443' ) ||
-        ( $scheme == 'http' && $port != '80' ) 
+        ( $scheme == 'http' && $port != '80' )
     ) {
         // Only include the port if it's not the default
         $host = "$host:$port";
@@ -213,7 +213,7 @@ function doAuthorizationRedirect() {
     $url .= strpos( $url, '?' ) ? '&' : '?';
     $url .= http_build_query( array(
         'format' => 'json',
-        
+
         // OAuth information
         'oauth_callback' => 'oob', // Must be "oob" for MWOAuth
         'oauth_consumer_key' => $gConsumerKey,
