@@ -3,3 +3,5 @@
 Content licensed under CC BY-SA 3.0 &middot; By contributors of <a href="https://meta.wikimedia.org/wiki/Wikipedia_Asian_Month">Wikpedia Asian Month</a>.
 
 </div>
+<script src="http://tools-static.wmflabs.org/static/jquery/1.11.0/jquery.min.js"></script>
+<script src="js/main.js"></script>

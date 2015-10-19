@@ -6,6 +6,7 @@
         <th>Article name</th>
         <th>Date and time</th>
         <th>Current byte count</th>
+        <th>Approximate word count<br><button id="check-all-wc" class="btn btn-default btn-xs">Check word count for pending articles</button></th>
         <th>Status</th>
         </tr>
     </thead>
@@ -17,13 +18,18 @@
             } else {
                 $page_size = 0;
             }
+            $status = "no";
+            if ($page_size >= 3500) {
+                $status = "pending";
+            }
         ?>
         <tr>
             <td><a href="//<?= $wiki ?>/wiki/<?= $all_pages[$i]['title'] ?>"><?= $all_pages[$i]['title'] ?></a></td>
             <td><?= date("j F Y, H:i:s", strtotime($all_pages[$i]['timestamp'])) ?></td>
             <td><?= $page_size ?></td>
+            <td><button class="btn btn-default check-wc btn-xs" data-status="<?= $status ?>" data-pageid="<?= $all_pages[$i]['pageid'] ?>" data-wiki="<?= $wiki ?>">Check word count</button></td>
             <td><!-- <?= $all_pages[$i]['pageid'] ?> --><?php
-            if ($page_size >= 3500) { ?>
+            if ($status === "pending") { ?>
                 <span class="label label-warning">Pending</span>
             <?php } else { ?>
                 <span class="label label-danger">No</span>

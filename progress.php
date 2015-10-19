@@ -11,7 +11,7 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : '';
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Wikipedia Asian Month</title>
-    
+
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -28,7 +28,8 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : '';
                 array_push($all_pageids, $all_pages[$i]['pageid']);
             }
             $all_page_sizes = get_page_size($all_pageids, $wiki)['query']['pages'];
-            //echo json_encode($all_page_sizes);         
+
+            //echo json_encode($all_page_sizes);
             //echo json_encode($all_pages);
             require_once("inc/progress_individual.php");
         } else {

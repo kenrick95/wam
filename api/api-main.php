@@ -57,6 +57,27 @@ function get_page_content ($pageids = [], $wiki = "meta.wikimedia.org") {
 }
 
 /**
+ * Get plain text of a page
+ * @param  array  $pageids Array of page IDs
+ * @return [type]         [description]
+ */
+function get_page_text_content ($pageids = [], $wiki = "meta.wikimedia.org") {
+    $params = array(
+        "action" => "query",
+        "prop" => "extracts",
+        "format" => "json",
+        "explaintext" => "",
+        "pageids" => implode("|", $pageids)
+        );
+    return json_decode(api_query($params, $wiki), true);
+}
+
+function get_page_wordcount ($pageid, $wiki = "meta.wikimedia.org") {
+    $text = get_page_text_content([$pageid], $wiki)['query']['pages'][$pageid]['extract'];
+    return str_word_count($text);
+}
+
+/**
  * Get page size of a page
  * @param  array  $pageids Array of page IDs
  * @return [type]         [description]
@@ -127,7 +148,7 @@ function get_all_new_pages_of_user ($user = "", $wiki = "meta.wikimedia.org") {
 
 function get_participants_list() {
     // [[meta:Wikipedia_Asian_Month/Participants]]
-    $raw_data = get_page_content([8962039])['query']['pages'][8962039]['revisions'][0]['*'];
+    $raw_data = get_page_content([9086071])['query']['pages'][9086071]['revisions'][0]['*'];
 
     preg_match_all("/{{target\s*\|\s*user\s*=\s*(\S+)\s*\|\s*site\s*=\s*(\S+)\s*}}/", $raw_data, $data);
     //var_dump($data);
