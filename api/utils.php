@@ -16,14 +16,14 @@ function http_request($url, $post = "") {
     // curl_setopt($ch, CURLOPT_VERBOSE, true); // Display communication with server
     // $fp = fopen("output.tmp", "w");
     // curl_setopt($ch, CURLOPT_STDERR, $fp); // Display communication with server
-    
+
     $return = curl_exec($ch);
     if (!$return) {
         throw new Exception("Error getting data from server ($url): " . curl_error($ch));
     }
 
     curl_close($ch);
-    
+
     return $return;
 }
 function array_to_string($array, $join_elem, $join_kv) {

@@ -74,7 +74,7 @@ function get_page_text_content ($pageids = [], $wiki = "meta.wikimedia.org") {
 
 function get_page_wordcount ($pageid, $wiki = "meta.wikimedia.org") {
     $text = get_page_text_content([$pageid], $wiki)['query']['pages'][$pageid]['extract'];
-    return str_word_count($text);
+    return count(preg_split('~[^\p{L}\p{N}\']+~u', utf8_encode($text)));
 }
 
 /**
