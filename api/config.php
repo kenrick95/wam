@@ -9,14 +9,13 @@ $settings['period']['end'] = mktime(23, 59, 59, 11, 30, 2015);
 $settings['mwOAuthAuthorizeUrl'] = 'https://www.mediawiki.org/wiki/Special:OAuth/authorize';
 $settings['mwOAuthUrl'] = 'https://www.mediawiki.org/w/index.php?title=Special:OAuth';
 $settings['mwOAuthIW'] = 'mw';
-$settings['apiUrl'] = 'https://test.wikipedia.org/w/api.php';
-$settings['mytalkUrl'] = 'https://test.wikipedia.org/wiki/Special:MyTalk#Hello.2C_world';
+$settings['apiUrl'] = 'https://meta.wikimedia.org/w/api.php';
 $settings['errorCode'] = 200;
 
-# REMOVE BEFORE COMMIT!
-$settings['gUserAgent'] = "Kenrick-Tool/1.0 wam";
+$settings['gUserAgent'] = "";
 $settings['gConsumerKey'] = "";
 $settings['gConsumerSecret'] = "";
+include("secret_config.php");
 
 $settings['gTokenKey'] = '';
 $settings['gTokenSecret'] = '';

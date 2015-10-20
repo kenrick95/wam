@@ -1,3 +1,3 @@
 <?php
-$__next_page = "progress";
+$__next_page = "judging";
 require_once("base_participant_list.php");

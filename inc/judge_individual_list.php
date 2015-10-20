@@ -1,8 +1,8 @@
 <h2>Progress for <a href="//<?= $wiki ?>/wiki/User:<?= $username ?>"><?= $username ?></a> at <a href="//<?= $wiki ?>/wiki/"><?= $wiki; ?></a></h2>
 <ol class="breadcrumb">
-    <li><a href="progress.php">#</a></li>
-    <li><a href="progress.php?filter=<?= $wiki; ?>"><?= $wiki; ?></a></li>
-    <li><a class="active" href="progress.php?username=<?= $username ?>&amp;wiki=<?= $wiki ?>"><?= $username; ?></a></li>
+    <li><a href="judging.php">#</a></li>
+    <li><a href="judging.php?filter=<?= $wiki; ?>"><?= $wiki; ?></a></li>
+    <li><a class="active" href="judging.php?username=<?= $username ?>&amp;wiki=<?= $wiki ?>"><?= $username; ?></a></li>
 </ol>
 <div class="table-responsive">
     <table class="table">
@@ -13,6 +13,8 @@
         <th>Current byte count</th>
         <th>Approximate word count<br><button id="check-all-wc" class="btn btn-default btn-xs">Check word count for pending articles</button></th>
         <th>Status</th>
+        <th>&nbsp;</th>
+        </tr>
     </thead>
     <tbody>
     <?php
@@ -38,6 +40,12 @@
             <?php } else { ?>
                 <span class="label label-danger">No</span>
             <?php } ?></td>
+            <td>
+                <a class="btn btn-default btn-xs"
+                href="judging.php?pageid=<?= $all_pages[$i]['pageid'] ?>&amp;username=<?= $username ?>&amp;wiki=<?= $wiki ?>">
+                    Judge
+                </a>
+            </td>
         </tr>
         <?php
         }

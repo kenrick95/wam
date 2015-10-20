@@ -34,7 +34,11 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : '';
             require_once("inc/progress_individual.php");
         } else {
             $participants = get_participants_list();
-            require_once("inc/participant_list.php");
+            if (!empty($filter)) {
+                require_once("inc/participant_list.php");
+            } else {
+                require_once("inc/wiki_list.php");
+            }
         }
         ?>
     </main>

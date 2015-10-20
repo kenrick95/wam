@@ -55,6 +55,20 @@ function get_page_content ($pageids = [], $wiki = "meta.wikimedia.org") {
         );
     return json_decode(api_query($params, $wiki), true);
 }
+/**
+ * Get page title from page id
+ * @param  integer  $pageid page ID
+ * @return string   page title
+ */
+function get_page_title ($pageid, $wiki = "meta.wikimedia.org") {
+    $params = array(
+        "action" => "query",
+        "prop" => "revisions",
+        "format" => "json",
+        "pageids" => $pageid
+        );
+    return json_decode(api_query($params, $wiki), true)['query']['pages'][$pageid]['title'];
+}
 
 /**
  * Get plain text of a page
@@ -355,12 +369,12 @@ function fetchAccessToken() {
  * @return array API results
  */
 function doApiQuery( $post, &$ch = null ) {
-    global $apiUrl, $gUserAgent, $gConsumerKey, $gTokenKey;
+    global $settings;
 
     $headerArr = array(
         // OAuth information
-        'oauth_consumer_key' => $gConsumerKey,
-        'oauth_token' => $gTokenKey,
+        'oauth_consumer_key' => $settings['gConsumerKey'],
+        'oauth_token' => $settings['gTokenKey'],
         'oauth_version' => '1.0',
         'oauth_nonce' => md5( microtime() . mt_rand() ),
         'oauth_timestamp' => time(),
@@ -368,7 +382,7 @@ function doApiQuery( $post, &$ch = null ) {
         // We're using secret key signatures here.
         'oauth_signature_method' => 'HMAC-SHA1',
     );
-    $signature = sign_request( 'POST', $apiUrl, $post + $headerArr );
+    $signature = sign_request( 'POST', $settings['apiUrl'], $post + $headerArr );
     $headerArr['oauth_signature'] = $signature;
 
     $header = array();
@@ -381,11 +395,11 @@ function doApiQuery( $post, &$ch = null ) {
         $ch = curl_init();
     }
     curl_setopt( $ch, CURLOPT_POST, true );
-    curl_setopt( $ch, CURLOPT_URL, $apiUrl );
+    curl_setopt( $ch, CURLOPT_URL, $settings['apiUrl'] );
     curl_setopt( $ch, CURLOPT_POSTFIELDS, http_build_query( $post ) );
     curl_setopt( $ch, CURLOPT_HTTPHEADER, array( $header ) );
-    //curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
-    curl_setopt( $ch, CURLOPT_USERAGENT, $gUserAgent );
+    curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
+    curl_setopt( $ch, CURLOPT_USERAGENT, $settings['gUserAgent'] );
     curl_setopt( $ch, CURLOPT_HEADER, 0 );
     curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
     $data = curl_exec( $ch );
@@ -407,8 +421,8 @@ function doApiQuery( $post, &$ch = null ) {
  * Perform a generic edit
  * @return void
  */
-function doEdit() {
-    global $mwOAuthIW;
+function doEdit($verdict, $username, $wiki = "meta.wikimedia.org") {
+    global $settings;
 
     $ch = null;
 
@@ -436,7 +450,13 @@ function doEdit() {
         echo 'Not logged in. (How did that happen?)';
         exit(0);
     }
-    $page = 'User talk:' . $res->query->userinfo->name;
+    $current_username = $res->query->userinfo->name;
+    $page = 'Wikipedia Asian Month/' . $wiki . "/" . $username;
+    // TODO check whether $page exists
+
+    // TODO add or edit {{WAM-art | title = ... | verdict = ... | last_updated_by = ... }}
+
+
 
     // Next fetch the edit token
     $res = doApiQuery( array(
@@ -456,9 +476,7 @@ function doEdit() {
         'format' => 'json',
         'action' => 'edit',
         'title' => $page,
-        'section' => 'new',
-        'sectiontitle' => 'Hello, world',
-        'text' => 'This message was posted using the OAuth Hello World application, and should be seen as coming from yourself. To revoke this application\'s access to your account, visit [[:' . $mwOAuthIW . ':Special:OAuthManageMyGrants]]. ~~~~',
+        'text' => 'This message was posted using the OAuth Hello World application, and should be seen as coming from yourself. To revoke this application\'s access to your account, visit [[:' . $settings['mwOAuthIW'] . ':Special:OAuthManageMyGrants]]. ~~~~',
         'summary' => '/* Hello, world */ Hello from OAuth!',
         'watchlist' => 'nochange',
         'token' => $token,

@@ -4,3 +4,6 @@ body {
 main dl {
     margin-left: 3em;
 }
+iframe {
+    border: 1px solid #ccc;
+}

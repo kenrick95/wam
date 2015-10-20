@@ -9,3 +9,4 @@ $permitted_fn = ['get_page_wordcount'];
 if (function_exists($func) && in_array($func, $permitted_fn)) {
     echo json_encode(call_user_func($func, $x, $y));
 }
+// TODO handle verdict from judge_individual_article

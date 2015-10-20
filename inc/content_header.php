@@ -19,7 +19,7 @@
             </ul>
             <ul class="nav navbar-nav navbar-right">
             <li><a href="https://meta.wikimedia.org/wiki/Talk:Wikipedia_Asian_Month">Talk page</a></li>
-            <li><a href="judging.php">Judging</a></li>
+            <li<?php if ($_current_page == "judging") { echo " class=\"active\""; } ?>><a href="judging.php">Judging</a></li>
             </ul>
         </div><!-- /.navbar-collapse -->
     </div>
