@@ -13,13 +13,13 @@
             <ul class="nav navbar-nav">
             <li<?php if ($_current_page == "home") { echo " class=\"active\""; } ?>><a href="index.php">Home</a></li>
             <li<?php if ($_current_page == "progress") { echo " class=\"active\""; } ?>><a href="progress.php">Check progress</a></li>
-            
+
             </ul>
             </li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
             <li><a href="https://meta.wikimedia.org/wiki/Talk:Wikipedia_Asian_Month">Talk page</a></li>
-            <li><a href="#">Judging</a></li>
+            <li><a href="judging.php">Judging</a></li>
             </ul>
         </div><!-- /.navbar-collapse -->
     </div>

@@ -1,6 +1,7 @@
 <?php
 require_once("api/api-main.php");
-$_current_page = "home";
+
+$_current_page = "judging";
 ?><!DOCTYPE html>
 <html>
 <head>

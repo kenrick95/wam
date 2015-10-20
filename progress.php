@@ -41,7 +41,5 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : '';
     <footer class="container">
     <?php require_once("inc/content_footer.php"); ?>
     </footer>
-    <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-    <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.1.1/js/bootstrap.min.js"></script>
 </body>
 </html>

@@ -180,7 +180,7 @@ function get_participants_list() {
  *Â @return string Signature
  */
 function sign_request( $method, $url, $params = array() ) {
-    global $gConsumerSecret, $gTokenSecret;
+    global $settings;
 
     $parts = parse_url( $url );
 
@@ -216,7 +216,7 @@ function sign_request( $method, $url, $params = array() ) {
     $toSign = rawurlencode( strtoupper( $method ) ) . '&' .
         rawurlencode( "$scheme://$host$path" ) . '&' .
         rawurlencode( join( '&', $pairs ) );
-    $key = rawurlencode( $gConsumerSecret ) . '&' . rawurlencode( $gTokenSecret );
+    $key = rawurlencode( $settings['gConsumerSecret'] ) . '&' . rawurlencode( $settings['gTokenSecret'] );
     return base64_encode( hash_hmac( 'sha1', $toSign, $key, true ) );
 }
 
@@ -225,19 +225,19 @@ function sign_request( $method, $url, $params = array() ) {
  * @return void
  */
 function doAuthorizationRedirect() {
-    global $mwOAuthUrl, $mwOAuthAuthorizeUrl, $gUserAgent, $gConsumerKey, $gTokenSecret;
+    global $settings;
 
     // First, we need to fetch a request token.
     // The request is signed with an empty token secret and no token key.
-    $gTokenSecret = '';
-    $url = $mwOAuthUrl . '/initiate';
+    $settings['gTokenSecret'] = '';
+    $url = $settings['mwOAuthUrl'] . '/initiate';
     $url .= strpos( $url, '?' ) ? '&' : '?';
     $url .= http_build_query( array(
         'format' => 'json',
 
         // OAuth information
         'oauth_callback' => 'oob', // Must be "oob" for MWOAuth
-        'oauth_consumer_key' => $gConsumerKey,
+        'oauth_consumer_key' => $settings['gConsumerKey'],
         'oauth_version' => '1.0',
         'oauth_nonce' => md5( microtime() . mt_rand() ),
         'oauth_timestamp' => time(),
@@ -249,8 +249,8 @@ function doAuthorizationRedirect() {
     $url .= "&oauth_signature=" . urlencode( $signature );
     $ch = curl_init();
     curl_setopt( $ch, CURLOPT_URL, $url );
-    //curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
-    curl_setopt( $ch, CURLOPT_USERAGENT, $gUserAgent );
+    curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
+    curl_setopt( $ch, CURLOPT_USERAGENT, $settings['gUserAgent'] );
     curl_setopt( $ch, CURLOPT_HEADER, 0 );
     curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
     $data = curl_exec( $ch );
@@ -279,11 +279,11 @@ function doAuthorizationRedirect() {
     session_write_close();
 
     // Then we send the user off to authorize
-    $url = $mwOAuthAuthorizeUrl;
+    $url = $settings['mwOAuthAuthorizeUrl'];
     $url .= strpos( $url, '?' ) ? '&' : '?';
     $url .= http_build_query( array(
         'oauth_token' => $token->key,
-        'oauth_consumer_key' => $gConsumerKey,
+        'oauth_consumer_key' => $settings['gConsumerKey'],
     ) );
     header( "Location: $url" );
     echo 'Please see <a href="' . htmlspecialchars( $url ) . '">' . htmlspecialchars( $url ) . '</a>';
@@ -294,17 +294,17 @@ function doAuthorizationRedirect() {
  * @return void
  */
 function fetchAccessToken() {
-    global $mwOAuthUrl, $gUserAgent, $gConsumerKey, $gTokenKey, $gTokenSecret;
+    global $settings;
 
-    $url = $mwOAuthUrl . '/token';
+    $url = $settings['mwOAuthUrl'] . '/token';
     $url .= strpos( $url, '?' ) ? '&' : '?';
     $url .= http_build_query( array(
         'format' => 'json',
         'oauth_verifier' => $_GET['oauth_verifier'],
 
         // OAuth information
-        'oauth_consumer_key' => $gConsumerKey,
-        'oauth_token' => $gTokenKey,
+        'oauth_consumer_key' => $settings['gConsumerKey'],
+        'oauth_token' => $settings['gTokenKey'],
         'oauth_version' => '1.0',
         'oauth_nonce' => md5( microtime() . mt_rand() ),
         'oauth_timestamp' => time(),
@@ -316,8 +316,8 @@ function fetchAccessToken() {
     $url .= "&oauth_signature=" . urlencode( $signature );
     $ch = curl_init();
     curl_setopt( $ch, CURLOPT_URL, $url );
-    //curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
-    curl_setopt( $ch, CURLOPT_USERAGENT, $gUserAgent );
+    curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
+    curl_setopt( $ch, CURLOPT_USERAGENT, $settings['gUserAgent'] );
     curl_setopt( $ch, CURLOPT_HEADER, 0 );
     curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
     $data = curl_exec( $ch );
@@ -341,8 +341,8 @@ function fetchAccessToken() {
 
     // Save the access token
     session_start();
-    $_SESSION['tokenKey'] = $gTokenKey = $token->key;
-    $_SESSION['tokenSecret'] = $gTokenSecret = $token->secret;
+    $_SESSION['tokenKey'] = $settings['gTokenKey'] = $token->key;
+    $_SESSION['tokenSecret'] = $settings['gTokenSecret'] = $token->secret;
     session_write_close();
 }
 
