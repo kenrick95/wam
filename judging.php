@@ -35,14 +35,21 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : '';
             $article_page_size = $result[$pageid]['revisions'][0]['size'];
             $article_word_count = get_page_wordcount($pageid, $wiki);
 
+            $verdicts = get_verdict($username, $wiki);
+            $verdict = isset($verdicts[$article_title]) ? $verdicts[$article_title]['verdict'] : "";
+
             require_once("inc/judge_individual_article.php");
         } else if (!empty($username) && !empty($wiki)) {
             $all_pages = get_all_new_pages_of_user($username, $wiki)['query']['usercontribs'];
             $all_pageids = [];
+            $all_verdicts = get_verdict($username, $wiki);
+
             for ($i = 0; $i < count($all_pages); $i++) {
                 array_push($all_pageids, $all_pages[$i]['pageid']);
             }
             $all_page_sizes = get_page_size($all_pageids, $wiki)['query']['pages'];
+
+
 
             //echo json_encode($all_page_sizes);
             //echo json_encode($all_pages);

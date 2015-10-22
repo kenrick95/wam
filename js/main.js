@@ -20,4 +20,28 @@ $(document).ready(function () {
         });
         $(this).hide();
     });
+    $(".judge-article").click(function () {
+        $("#status").text("Submiting...");
+        $(".judge-article").attr("disabled", "disabled");
+        $.ajax({
+            url: "api/handler.php",
+            dataType: "json",
+            method: "post",
+            data: {
+                func: "do_judgement",
+                v: $(this).data('verdict'),
+                x: $(this).data('pageTitle'),
+                y: $(this).data('username'),
+                z: $(this).data('wiki')
+            }
+        }).done(function(data) {
+            $(".judge-article").removeClass("active");
+            $(".judge-article").removeAttr("disabled");
+            $("#status").text(data);
+            setTimeout(function () {
+                $("#status").text("");
+            }, 2000);
+            $(this).addClass("active");
+        }.bind(this));
+    });
 });

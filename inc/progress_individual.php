@@ -22,10 +22,9 @@
             } else {
                 $page_size = 0;
             }
-            $status = "no";
-            if ($page_size >= 3500) {
-                $status = "pending";
-            }
+            $status = isset($all_verdicts[$all_pages[$i]['title']])
+                ? $all_verdicts[$all_pages[$i]['title']]['verdict']
+                : (($page_size >= 3500) ? "pending" : "no");
         ?>
         <tr>
             <td><a href="//<?= $wiki ?>/wiki/<?= $all_pages[$i]['title'] ?>"><?= $all_pages[$i]['title'] ?></a></td>
@@ -33,7 +32,9 @@
             <td><?= $page_size ?></td>
             <td><button class="btn btn-default check-wc btn-xs" data-status="<?= $status ?>" data-pageid="<?= $all_pages[$i]['pageid'] ?>" data-wiki="<?= $wiki ?>">Check word count</button></td>
             <td><!-- <?= $all_pages[$i]['pageid'] ?> --><?php
-            if ($status === "pending") { ?>
+            if ($status === "yes") { ?>
+                <span class="label label-success">Yes</span>
+            <?php } else if ($status === "pending") { ?>
                 <span class="label label-warning">Pending</span>
             <?php } else { ?>
                 <span class="label label-danger">No</span>

@@ -24,6 +24,7 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : '';
         if (!empty($username) && !empty($wiki)) {
             $all_pages = get_all_new_pages_of_user($username, $wiki)['query']['usercontribs'];
             $all_pageids = [];
+            $all_verdicts = get_verdict($username, $wiki);
             for ($i = 0; $i < count($all_pages); $i++) {
                 array_push($all_pageids, $all_pages[$i]['pageid']);
             }

@@ -55,6 +55,23 @@ function get_page_content ($pageids = [], $wiki = "meta.wikimedia.org") {
         );
     return json_decode(api_query($params, $wiki), true);
 }
+
+/**
+ * Get content of a page
+ * @param  string  $page_title
+ * @return [type]         [description]
+ */
+function get_page_content_using_title ($page_title, $wiki = "meta.wikimedia.org") {
+    $params = array(
+        "action" => "query",
+        "prop" => "revisions",
+        "format" => "json",
+        "rvprop" => "content",
+        "titles" => $page_title
+        );
+    return json_decode(api_query($params, $wiki), true);
+}
+
 /**
  * Get page title from page id
  * @param  integer  $pageid page ID
@@ -63,11 +80,25 @@ function get_page_content ($pageids = [], $wiki = "meta.wikimedia.org") {
 function get_page_title ($pageid, $wiki = "meta.wikimedia.org") {
     $params = array(
         "action" => "query",
-        "prop" => "revisions",
+        "prop" => "info",
         "format" => "json",
         "pageids" => $pageid
         );
     return json_decode(api_query($params, $wiki), true)['query']['pages'][$pageid]['title'];
+}
+/**
+ * Get page id from page title
+ * @param  integer  $pageid page ID
+ * @return string   page title
+ */
+function get_page_id ($title, $wiki = "meta.wikimedia.org") {
+    $params = array(
+        "action" => "query",
+        "prop" => "info",
+        "format" => "json",
+        "titles" => $title
+        );
+    return key(json_decode(api_query($params, $wiki), true)['query']['pages']);
 }
 
 /**
@@ -417,11 +448,47 @@ function doApiQuery( $post, &$ch = null ) {
     return $ret;
 }
 
+function get_judged_articles($username, $wiki) {
+    $judge_page = 'Wikipedia Asian Month/Judging/' . $wiki . "/" . $username;
+    $res = get_page_content_using_title($judge_page)['query']['pages'];
+    $judge_page_id = key($res);
+    $page_content = $res[$judge_page_id]['revisions'][0]['*'];
+
+    $data = [];
+    $regex = "/\* {{WAM\-art \| title = (.+) \| verdict = .+ \| last_updated_by = .+ }}/";
+    preg_match_all($regex, $page_content, $data);
+    $article_judged = $data[1];
+
+    return array($article_judged, $page_content);
+}
+function get_verdict($username, $wiki) {
+    $judge_page = 'Wikipedia Asian Month/Judging/' . $wiki . "/" . $username;
+    $res = get_page_content_using_title($judge_page)['query']['pages'];
+    $judge_page_id = key($res);
+    if ($judge_page_id < 0)
+        return false;
+    $page_content = $res[$judge_page_id]['revisions'][0]['*'];
+
+    $data = [];
+    $regex = "/\* {{WAM\-art \| title = (.+) \| verdict = (.+) \| last_updated_by = (.+) }}/";
+    preg_match_all($regex, $page_content, $data);
+
+    $ret = [];
+    for ($i = 0; $i < count($data[0]); $i++) {
+        $ret[$data[1][$i]] = array(
+            "verdict" => $data[2][$i],
+            "last_updated_by" => $data[3][$i]
+        );
+    }
+
+    return $ret;
+}
+
 /**
- * Perform a generic edit
+ * Save a judgement to meta-wiki
  * @return void
  */
-function doEdit($verdict, $username, $wiki = "meta.wikimedia.org") {
+function do_judgement($verdict, $page_title, $username, $wiki = "meta.wikimedia.org") {
     global $settings;
 
     $ch = null;
@@ -451,12 +518,40 @@ function doEdit($verdict, $username, $wiki = "meta.wikimedia.org") {
         exit(0);
     }
     $current_username = $res->query->userinfo->name;
-    $page = 'Wikipedia Asian Month/' . $wiki . "/" . $username;
-    // TODO check whether $page exists
 
-    // TODO add or edit {{WAM-art | title = ... | verdict = ... | last_updated_by = ... }}
+    $edit_page = 'Wikipedia Asian Month/Judging/' . $wiki . "/" . $username;
+    $edit_page_id = get_page_id($edit_page);
 
+    $edit_text = "";
 
+    // check whether $edit_page exists
+    if ($edit_page_id >= 0) {
+        $q = get_judged_articles($username, $wiki);
+        // $edit_page exists
+        $page_content = $q[1];
+        $article_judged = $q[0];
+
+        if (in_array($page_title, $article_judged)) {
+            // edit entry {{WAM-art | title = ... | verdict = ... | last_updated_by = ... }}
+            $regex = "/\* {{WAM\-art \| title = " . preg_quote($page_title). " \| verdict = .+ \| last_updated_by = .+ }}/";
+            $replacement = '* {{WAM-art'
+                . ' | title = '. $page_title
+                . ' | verdict = ' . $verdict
+                . ' | last_updated_by = ' . $current_username . ' }}';
+
+            $edit_text = preg_replace($regex, $replacement, $page_content);
+
+        } else {
+            // append entry {{WAM-art | title = ... | verdict = ... | last_updated_by = ... }}
+            $edit_text = $page_content . "\n* {{WAM-art | title = $page_title | verdict = $verdict | last_updated_by = $current_username }}";
+
+        }
+    } else {
+        // $edit_page does not exist
+        // input entry {{WAM-art | title = ... | verdict = ... | last_updated_by = ... }}
+        $edit_text = "* {{WAM-art | title = $page_title | verdict = $verdict | last_updated_by = $current_username }}";
+
+    }
 
     // Next fetch the edit token
     $res = doApiQuery( array(
@@ -475,13 +570,12 @@ function doEdit($verdict, $username, $wiki = "meta.wikimedia.org") {
     $res = doApiQuery( array(
         'format' => 'json',
         'action' => 'edit',
-        'title' => $page,
-        'text' => 'This message was posted using the OAuth Hello World application, and should be seen as coming from yourself. To revoke this application\'s access to your account, visit [[:' . $settings['mwOAuthIW'] . ':Special:OAuthManageMyGrants]]. ~~~~',
-        'summary' => '/* Hello, world */ Hello from OAuth!',
+        'title' => $edit_page,
+        'text' => $edit_text,
+        'summary' => '[[Wikipedia Asian Month|WAM]]: Judging user ' . $username . ' of '. $wiki,
         'watchlist' => 'nochange',
         'token' => $token,
     ), $ch );
 
-    echo 'API edit result: <pre>' . htmlspecialchars( var_export( $res, 1 ) ) . '</pre>';
-    echo '<hr>';
+    return $res->edit->result;
 }

@@ -7,3 +7,6 @@ main dl {
 iframe {
     border: 1px solid #ccc;
 }
+#status {
+    font-size: 75%;
+}
