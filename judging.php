@@ -19,7 +19,19 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : '';
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Wikipedia Asian Month</title>
+    <title>Wikipedia Asian Month - Judging<?php
+        if (!empty($pageid) && !empty($username) && !empty($wiki)) {
+            $result = get_page_size([$pageid], $wiki)['query']['pages'];
+            $article_title = $result[$pageid]['title'];
+            echo ": $article_title by $username at $wiki";
+        } else if (!empty($username) && !empty($wiki)) {
+            echo " articles by $username at $wiki";
+        } else {
+            if (!empty($filter)) {
+                echo " articles at $filter";
+            }
+        }
+        ?></title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -30,8 +42,7 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : '';
     <main class="container">
         <?php
         if (!empty($pageid) && !empty($username) && !empty($wiki)) {
-            $result = get_page_size([$pageid], $wiki)['query']['pages'];
-            $article_title = $result[$pageid]['title'];
+
             $article_page_size = $result[$pageid]['revisions'][0]['size'];
             $article_word_count = get_page_wordcount($pageid, $wiki);
 

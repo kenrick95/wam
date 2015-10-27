@@ -10,7 +10,15 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : '';
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Wikipedia Asian Month</title>
+    <title>Wikipedia Asian Month - Check Progress<?php
+        if (!empty($username) && !empty($wiki)) {
+            echo " of $username at $wiki";
+        } else {
+            if (!empty($filter)) {
+                echo " at $filter";
+            }
+        }
+        ?></title>
 
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
