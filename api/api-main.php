@@ -160,13 +160,13 @@ function get_meta_page () {
 function get_page_content_html ($title, $wiki = "meta.wikimedia.org") {
     $url = "http://rest.wikimedia.org:80/$wiki/v1/page/html/$title";
     $params = "";
-    $data = http_request($url, $params);
-    if (empty($data)) {
+    $raw_data = http_request($url, $params);
+    if (empty($raw_data)) {
         throw new Exception("No data received from server. Check that API is enabled.");
     }
     // little processing
-    $data = explode("</head>", $data)[1];
-    $data = explode("<link>", $data)[0];
+    preg_match_all("/<body[^>]*>(.*?)<\/body>/is", $raw_data, $data);
+    $data = $data[1][0];
     $data = str_replace("./", "//$wiki/wiki/", $data);
 
     return $data;
