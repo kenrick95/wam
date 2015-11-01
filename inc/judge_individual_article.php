@@ -36,8 +36,9 @@ if ($article_word_count >= 300) {
 <span class="label label-<?= $label_page_size ?>"><?= $article_page_size ?> bytes</span>
 <span class="label label-<?= $label_word_count ?>"><?= $article_word_count ?> words (approx.)</span>
 <?php
-$wiki_exp = explode('.', $wiki);
-$wiki_mobile = $wiki_exp[0] . ".m." . $wiki_exp[1] . "." . $wiki_exp[2];
+$rest_wiki = "rest.wikimedia.org/" . $wiki . "/v1/page/html/" . $article_title;
 
 ?>
-<iframe src="//<?= $wiki_mobile ?>/wiki/<?= $article_title ?>?redirect=no" width="1150" height="500"></iframe>
+<div>
+<?= get_page_content_html($article_title, $wiki) ?>
+</div>

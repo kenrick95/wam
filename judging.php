@@ -4,9 +4,14 @@ if (empty($settings['gTokenKey'])) {
     doAuthorizationRedirect();
 }
 
-// TODO fetch list the organizers
-// TODO match current OAuth-ed user with that list
+// fetch list the organizers
+$organizers = get_organizers_list();
 
+if (empty($settings['loggedinUsername'])){
+    $settings['loggedinUsername'] = fetch_current_username();
+}
+// match current OAuth-ed user with that list
+$okay = in_array($settings['loggedinUsername'], $organizers);
 
 $_current_page = "judging";
 $pageid = isset($_GET["pageid"]) ? $_GET["pageid"] : "";
@@ -41,7 +46,13 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : '';
     </header>
     <main class="container">
         <?php
-        if (!empty($pageid) && !empty($username) && !empty($wiki)) {
+        if (!$okay) {
+            ?>
+            <div class="alert alert-danger" role="alert">
+                You can't access this section because you are not the organizer in any wiki. Probably you want to check <a href="progress.php">your progress</a>.
+            </div>
+            <?php
+        } else if (!empty($pageid) && !empty($username) && !empty($wiki)) {
 
             $article_page_size = $result[$pageid]['revisions'][0]['size'];
             $article_word_count = get_page_wordcount($pageid, $wiki);

@@ -155,7 +155,10 @@ function get_page_size ($pageids = [], $wiki = "meta.wikimedia.org") {
 }
 
 function get_meta_page () {
-    $url = "http://rest.wikimedia.org:80/meta.wikimedia.org/v1/page/html/Wikipedia_Asian_Month";
+    return get_page_content_html("Wikipedia_Asian_Month", "meta.wikimedia.org");
+}
+function get_page_content_html ($title, $wiki = "meta.wikimedia.org") {
+    $url = "http://rest.wikimedia.org:80/$wiki/v1/page/html/$title";
     $params = "";
     $data = http_request($url, $params);
     if (empty($data)) {
@@ -164,7 +167,7 @@ function get_meta_page () {
     // little processing
     $data = explode("</head>", $data)[1];
     $data = explode("<link>", $data)[0];
-    $data = str_replace("./", "https://meta.wikimedia.org/wiki/", $data);
+    $data = str_replace("./", "//$wiki/wiki/", $data);
 
     return $data;
 }
@@ -195,17 +198,31 @@ function get_participants_list() {
     // [[meta:Wikipedia_Asian_Month/Participants]]
     $raw_data = get_page_content([9086071])['query']['pages'][9086071]['revisions'][0]['*'];
 
-    preg_match_all("/{{target\s*\|\s*user\s*=\s*(\S+)\s*\|\s*site\s*=\s*(\S+)\s*}}/", $raw_data, $data);
+    preg_match_all("/{{target\s*\|\s*user\s*=\s*(.+)\s*\|\s*site\s*=\s*(.+)\s*}}/", $raw_data, $data);
     //var_dump($data);
     $ret = [];
     for ($i = 1; $i < count($data[2]); $i++) {
         array_push($ret, array(
-            "username" => $data[1][$i],
-            "wiki" => $data[2][$i]
+            "username" => trim($data[1][$i]),
+            "wiki" =>trim($data[2][$i])
         ));
     }
     //var_dump($ret);
-    //die();
+    return $ret;
+}
+
+
+function get_organizers_list() {
+    // [[meta:Wikipedia_Asian_Month/Organizers]]
+    $raw_data = get_page_content([8962039])['query']['pages'][8962039]['revisions'][0]['*'];
+
+    preg_match_all("/{{target\s*\|\s*user\s*=\s*(.+)\s*\|\s*site\s*=\s*(.+)\s*}}/", $raw_data, $data);
+    //var_dump($data);
+    $ret = [];
+    for ($i = 1; $i < count($data[2]); $i++) {
+        array_push($ret, trim($data[1][$i]));
+    }
+    //var_dump($ret);
     return $ret;
 }
 
@@ -300,19 +317,19 @@ function doAuthorizationRedirect() {
     curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
     $data = curl_exec( $ch );
     if ( !$data ) {
-        header( "HTTP/1.1 $errorCode Internal Server Error" );
+        header( "HTTP/1.1 {$settings['errorCode']} Internal Server Error" );
         echo 'Curl error: ' . htmlspecialchars( curl_error( $ch ) );
         exit(0);
     }
     curl_close( $ch );
     $token = json_decode( $data );
     if ( is_object( $token ) && isset( $token->error ) ) {
-        header( "HTTP/1.1 $errorCode Internal Server Error" );
+        header( "HTTP/1.1 {$settings['errorCode']} Internal Server Error" );
         echo 'Error retrieving token: ' . htmlspecialchars( $token->error );
         exit(0);
     }
     if ( !is_object( $token ) || !isset( $token->key ) || !isset( $token->secret ) ) {
-        header( "HTTP/1.1 $errorCode Internal Server Error" );
+        header( "HTTP/1.1 {$settings['errorCode']} Internal Server Error" );
         echo 'Invalid response from token request';
         exit(0);
     }
@@ -367,22 +384,23 @@ function fetchAccessToken() {
     curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
     $data = curl_exec( $ch );
     if ( !$data ) {
-        header( "HTTP/1.1 $errorCode Internal Server Error" );
+        header( "HTTP/1.1 {$settings['errorCode']} Internal Server Error" );
         echo 'Curl error: ' . htmlspecialchars( curl_error( $ch ) );
         exit(0);
     }
-    curl_close( $ch );
     $token = json_decode( $data );
     if ( is_object( $token ) && isset( $token->error ) ) {
-        header( "HTTP/1.1 $errorCode Internal Server Error" );
+        header( "HTTP/1.1 {$settings['errorCode']} Internal Server Error" );
         echo 'Error retrieving token: ' . htmlspecialchars( $token->error );
         exit(0);
     }
     if ( !is_object( $token ) || !isset( $token->key ) || !isset( $token->secret ) ) {
-        header( "HTTP/1.1 $errorCode Internal Server Error" );
+        header( "HTTP/1.1 {$settings['errorCode']} Internal Server Error" );
         echo 'Invalid response from token request';
         exit(0);
     }
+
+    curl_close( $ch );
 
     // Save the access token
     session_start();
@@ -391,6 +409,38 @@ function fetchAccessToken() {
     session_write_close();
 }
 
+function fetch_current_username() {
+    // Fetch the username
+    $ch = null;
+    $res = doApiQuery( array(
+        'format' => 'json',
+        'action' => 'query',
+        'meta' => 'userinfo',
+    ), $ch );
+
+    if ( isset( $res->error->code ) && $res->error->code === 'mwoauth-invalid-authorization' ) {
+        // We're not authorized!
+        echo 'You haven\'t authorized this application yet!';
+        echo '<hr>';
+        return;
+    }
+
+    if ( !isset( $res->query->userinfo ) ) {
+        header( "HTTP/1.1 {$settings['errorCode']} Internal Server Error" );
+        echo 'Bad API response: <pre>' . htmlspecialchars( var_export( $res, 1 ) ) . '</pre>';
+        exit(0);
+    }
+    if ( isset( $res->query->userinfo->anon ) ) {
+        header( "HTTP/1.1 {$settings['errorCode']} Internal Server Error" );
+        echo 'Not logged in. (How did that happen?)';
+        exit(0);
+    }
+    $current_username = $res->query->userinfo->name;
+    session_start();
+    $_SESSION['loggedinUsername'] = $settings['loggedinUsername'] = $current_username;
+    session_write_close();
+    return $current_username;
+}
 
 /**
  * Send an API query with OAuth authorization
@@ -435,13 +485,13 @@ function doApiQuery( $post, &$ch = null ) {
     curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
     $data = curl_exec( $ch );
     if ( !$data ) {
-        header( "HTTP/1.1 $errorCode Internal Server Error" );
+        header( "HTTP/1.1 {$settings['errorCode']} Internal Server Error" );
         echo 'Curl error: ' . htmlspecialchars( curl_error( $ch ) );
         exit(0);
     }
     $ret = json_decode( $data );
     if ( $ret === null ) {
-        header( "HTTP/1.1 $errorCode Internal Server Error" );
+        header( "HTTP/1.1 {$settings['errorCode']} Internal Server Error" );
         echo 'Unparsable API response: <pre>' . htmlspecialchars( $data ) . '</pre>';
         exit(0);
     }
@@ -502,18 +552,18 @@ function do_judgement($verdict, $page_title, $username, $wiki = "meta.wikimedia.
 
     if ( isset( $res->error->code ) && $res->error->code === 'mwoauth-invalid-authorization' ) {
         // We're not authorized!
-        echo 'You haven\'t authorized this application yet! Go <a href="' . htmlspecialchars( $_SERVER['SCRIPT_NAME'] ) . '?action=authorize">here</a> to do that.';
+        echo 'You haven\'t authorized this application yet!';
         echo '<hr>';
         return;
     }
 
     if ( !isset( $res->query->userinfo ) ) {
-        header( "HTTP/1.1 $errorCode Internal Server Error" );
+        header( "HTTP/1.1 {$settings['errorCode']} Internal Server Error" );
         echo 'Bad API response: <pre>' . htmlspecialchars( var_export( $res, 1 ) ) . '</pre>';
         exit(0);
     }
     if ( isset( $res->query->userinfo->anon ) ) {
-        header( "HTTP/1.1 $errorCode Internal Server Error" );
+        header( "HTTP/1.1 {$settings['errorCode']} Internal Server Error" );
         echo 'Not logged in. (How did that happen?)';
         exit(0);
     }
@@ -560,7 +610,7 @@ function do_judgement($verdict, $page_title, $username, $wiki = "meta.wikimedia.
         'type' => 'edit',
     ), $ch );
     if ( !isset( $res->tokens->edittoken ) ) {
-        header( "HTTP/1.1 $errorCode Internal Server Error" );
+        header( "HTTP/1.1 {$settings['errorCode']} Internal Server Error" );
         echo 'Bad API response: <pre>' . htmlspecialchars( var_export( $res, 1 ) ) . '</pre>';
         exit(0);
     }
