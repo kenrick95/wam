@@ -5,6 +5,7 @@
 </ol>
 <ul>
 <?php
+    sort($participants);
     for ($i = 0; $i < count($participants); $i++) {
         if (!empty($filter) && $participants[$i]['wiki'] !== $filter) {
             continue;
