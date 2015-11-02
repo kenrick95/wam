@@ -11,7 +11,7 @@ if (empty($settings['loggedinUsername'])){
     $settings['loggedinUsername'] = fetch_current_username();
 }
 // match current OAuth-ed user with that list
-$okay = in_array($settings['loggedinUsername'], $organizers);
+$okay = in_array(str_replace(" ", "_", trim($settings['loggedinUsername'])), $organizers);
 
 $_current_page = "judging";
 $pageid = isset($_GET["pageid"]) ? $_GET["pageid"] : "";
@@ -59,6 +59,7 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : '';
 
             $verdicts = get_verdict($username, $wiki);
             $verdict = isset($verdicts[$article_title]) ? $verdicts[$article_title]['verdict'] : "";
+            $remarks = isset($verdicts[$article_title]) ? $verdicts[$article_title]['remarks'] : "";
 
             require_once("inc/judge_individual_article.php");
         } else if (!empty($username) && !empty($wiki)) {

@@ -24,7 +24,7 @@
             }
             $status = isset($all_verdicts[$all_pages[$i]['title']])
                 ? $all_verdicts[$all_pages[$i]['title']]['verdict']
-                : (($page_size >= 3500) ? "pending" : "no");
+                : (($page_size >= 3500) ? "pending" : "pending");
         ?>
         <tr>
             <td><a href="//<?= $wiki ?>/wiki/<?= $all_pages[$i]['title'] ?>"><?= $all_pages[$i]['title'] ?></a></td>

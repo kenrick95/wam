@@ -158,18 +158,24 @@ function get_meta_page () {
     return get_page_content_html("Wikipedia_Asian_Month", "meta.wikimedia.org");
 }
 function get_page_content_html ($title, $wiki = "meta.wikimedia.org") {
-    $url = "http://rest.wikimedia.org:80/$wiki/v1/page/html/$title";
+    $title = rawurlencode($title);
+    $url = "http://rest.wikimedia.org/$wiki/v1/page/html/$title";
     $params = "";
     $raw_data = http_request($url, $params);
     if (empty($raw_data)) {
         throw new Exception("No data received from server. Check that API is enabled.");
     }
-    // little processing
+    $stylesheet = explode("<link rel=\"stylesheet\" href=\"", $raw_data)[1];
+    $stylesheet = explode("\"/>", $stylesheet)[0];
+
     preg_match_all("/<body[^>]*>(.*?)<\/body>/is", $raw_data, $data);
     $data = $data[1][0];
     $data = str_replace("./", "//$wiki/wiki/", $data);
 
-    return $data;
+    //$ret = "<link rel=\"stylesheet\" href=\"" . $stylesheet . "\"/>"
+    //    . $data;
+    $ret = $data;
+    return $ret;
 }
 
 function get_all_new_pages_of_user ($user = "", $wiki = "meta.wikimedia.org") {
@@ -435,7 +441,7 @@ function fetch_current_username() {
         echo 'Not logged in. (How did that happen?)';
         exit(0);
     }
-    $current_username = $res->query->userinfo->name;
+    $current_username = str_replace(" ", "_", trim($res->query->userinfo->name));
     session_start();
     $_SESSION['loggedinUsername'] = $settings['loggedinUsername'] = $current_username;
     session_write_close();
@@ -505,7 +511,7 @@ function get_judged_articles($username, $wiki) {
     $page_content = $res[$judge_page_id]['revisions'][0]['*'];
 
     $data = [];
-    $regex = "/\* {{WAM\-art \| title = (.+) \| verdict = .+ \| last_updated_by = .+ }}/";
+    $regex = "/\* {{WAM\-art \| title = (.+) \| verdict = (.+) \| last_updated_by = ([^|]+)( \| remarks = (.+) )?}}/";
     preg_match_all($regex, $page_content, $data);
     $article_judged = $data[1];
 
@@ -520,14 +526,15 @@ function get_verdict($username, $wiki) {
     $page_content = $res[$judge_page_id]['revisions'][0]['*'];
 
     $data = [];
-    $regex = "/\* {{WAM\-art \| title = (.+) \| verdict = (.+) \| last_updated_by = (.+) }}/";
+    $regex = "/\* {{WAM\-art \| title = (.+) \| verdict = (.+) \| last_updated_by = ([^|]+)( \| remarks = (.+) )?}}/";
     preg_match_all($regex, $page_content, $data);
 
     $ret = [];
     for ($i = 0; $i < count($data[0]); $i++) {
         $ret[$data[1][$i]] = array(
             "verdict" => $data[2][$i],
-            "last_updated_by" => $data[3][$i]
+            "last_updated_by" => $data[3][$i],
+            "remarks" => $data[5][$i]
         );
     }
 
@@ -538,7 +545,7 @@ function get_verdict($username, $wiki) {
  * Save a judgement to meta-wiki
  * @return void
  */
-function do_judgement($verdict, $page_title, $username, $wiki = "meta.wikimedia.org") {
+function do_judgement($verdict, $page_title, $username, $remarks, $wiki = "meta.wikimedia.org") {
     global $settings;
 
     $ch = null;
@@ -582,24 +589,25 @@ function do_judgement($verdict, $page_title, $username, $wiki = "meta.wikimedia.
         $article_judged = $q[0];
 
         if (in_array($page_title, $article_judged)) {
-            // edit entry {{WAM-art | title = ... | verdict = ... | last_updated_by = ... }}
-            $regex = "/\* {{WAM\-art \| title = " . preg_quote($page_title). " \| verdict = .+ \| last_updated_by = .+ }}/";
+            // edit entry {{WAM-art | title = ... | verdict = ... | last_updated_by = ... | remarks = ... }}
+            $regex = "/\* {{WAM\-art \| title = " . preg_quote($page_title). " \| verdict = (.+) \| last_updated_by = ([^|]+)( \| remarks = (.+) )?}}/";
             $replacement = '* {{WAM-art'
                 . ' | title = '. $page_title
                 . ' | verdict = ' . $verdict
-                . ' | last_updated_by = ' . $current_username . ' }}';
+                . ' | last_updated_by = ' . $current_username
+                . ' | remarks = ' . $remarks . ' }}';
 
             $edit_text = preg_replace($regex, $replacement, $page_content);
 
         } else {
-            // append entry {{WAM-art | title = ... | verdict = ... | last_updated_by = ... }}
-            $edit_text = $page_content . "\n* {{WAM-art | title = $page_title | verdict = $verdict | last_updated_by = $current_username }}";
+            // append entry {{WAM-art | title = ... | verdict = ... | last_updated_by = ... | remarks = ... }}
+            $edit_text = $page_content . "\n* {{WAM-art | title = $page_title | verdict = $verdict | last_updated_by = $current_username | remarks = $remarks }}";
 
         }
     } else {
         // $edit_page does not exist
-        // input entry {{WAM-art | title = ... | verdict = ... | last_updated_by = ... }}
-        $edit_text = "* {{WAM-art | title = $page_title | verdict = $verdict | last_updated_by = $current_username }}";
+        // input entry {{WAM-art | title = ... | verdict = ... | last_updated_by = ... | remarks = ... }}
+        $edit_text = "* {{WAM-art | title = $page_title | verdict = $verdict | last_updated_by = $current_username | remarks = $remarks }}";
 
     }
 
@@ -622,7 +630,7 @@ function do_judgement($verdict, $page_title, $username, $wiki = "meta.wikimedia.
         'action' => 'edit',
         'title' => $edit_page,
         'text' => $edit_text,
-        'summary' => '[[Wikipedia Asian Month|WAM]]: Judging user ' . $username . ' of '. $wiki,
+        'summary' => '[[Wikipedia Asian Month|WAM]]: Give ' . $verdict . ' verdict on article ' . $page_title . ' for user ' . $username . ' of '. $wiki,
         'watchlist' => 'nochange',
         'token' => $token,
     ), $ch );

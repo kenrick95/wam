@@ -32,6 +32,7 @@ $(document).ready(function () {
                 v: $(this).data('verdict'),
                 x: $(this).data('pageTitle'),
                 y: $(this).data('username'),
+                k: $("#remarks").val(),
                 z: $(this).data('wiki')
             }
         }).done(function(data) {
