@@ -21,6 +21,20 @@ $settings['gTokenKey'] = '';
 $settings['gTokenSecret'] = '';
 $settings['loggedinUsername']  = '';
 
+$settings['minimumArticlePageSize'] = array(
+    "az.wikipedia.org" => 3000,
+    "uz.wikipedia.org" => 2500,
+    "pa.wikipedia.org" => 2500,
+    "*" => 3500,
+);
+$settings['minimumWordCount'] = array(
+    "az.wikipedia.org" => 250,
+    "uz.wikipedia.org" => 300,
+    "pa.wikipedia.org" => 200,
+    "*" => 300,
+);
+
+
 session_start();
 if ( isset( $_SESSION['tokenKey'] ) ) {
     $settings['gTokenKey'] = $_SESSION['tokenKey'];

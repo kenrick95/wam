@@ -9,11 +9,14 @@
 </ol>
 <?php
 $label_page_size = "danger";
-if ($article_page_size >= 3500) {
+$minimumArticlePageSize = isset($settings['minimumArticlePageSize'][$wiki]) ? $settings['minimumArticlePageSize'][$wiki] : $settings['minimumArticlePageSize']['*'];
+$minimumWordCount = isset($settings['minimumWordCount'][$wiki]) ? $settings['minimumWordCount'][$wiki] : $settings['minimumWordCount']['*'];
+
+if ($article_page_size >= $minimumArticlePageSize) {
     $label_page_size = "success";
 }
 $label_word_count = "danger";
-if ($article_word_count >= 300) {
+if ($article_word_count >= $minimumWordCount) {
     $label_word_count = "success";
 }
 
