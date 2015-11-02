@@ -226,7 +226,7 @@ function get_organizers_list() {
     //var_dump($data);
     $ret = [];
     for ($i = 1; $i < count($data[2]); $i++) {
-        array_push($ret, trim($data[1][$i]));
+        array_push($ret, str_replace(" ", "_", trim($data[1][$i])));
     }
     //var_dump($ret);
     return $ret;
