@@ -12,7 +12,9 @@
         <th>Date and time</th>
         <th>Current byte count</th>
         <th>Approximate word count<br><button id="check-all-wc" class="btn btn-default btn-xs">Check word count for pending articles</button></th>
-        <th>Status</th>
+        <th>Verdict</th>
+        <th>Remarks</th>
+        <th>Checked by</th>
         <th>&nbsp;</th>
         </tr>
     </thead>
@@ -28,7 +30,8 @@
             $status = isset($all_verdicts[$all_pages[$i]['title']])
                 ? $all_verdicts[$all_pages[$i]['title']]['verdict']
                 : (($page_size >= 3500) ? "pending" : "pending");
-
+            $remarks = isset($all_verdicts[$all_pages[$i]['title']]) ? $all_verdicts[$all_pages[$i]['title']]['remarks'] : "";
+            $judged_by = isset($all_verdicts[$all_pages[$i]['title']]) ? $all_verdicts[$all_pages[$i]['title']]['last_updated_by'] : "";
 
         ?>
         <tr>
@@ -44,6 +47,8 @@
             <?php } else { ?>
                 <span class="label label-danger">No</span>
             <?php } ?></td>
+            <td><?= $remarks ?></td>
+            <td><a href="//<?= $wiki ?>/wiki/User:<?= $judged_by ?>"><?= $judged_by ?></a></td>
             <td>
                 <a class="btn btn-default btn-xs"
                 href="judging.php?pageid=<?= $all_pages[$i]['pageid'] ?>&amp;username=<?= $username ?>&amp;wiki=<?= $wiki ?>">
