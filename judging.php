@@ -72,8 +72,6 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : '';
             }
             $all_page_sizes = get_page_size($all_pageids, $wiki)['query']['pages'];
 
-
-
             //echo json_encode($all_page_sizes);
             //echo json_encode($all_pages);
             require_once("inc/judge_individual_list.php");

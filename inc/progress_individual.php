@@ -11,7 +11,7 @@
         <th>Article name</th>
         <th>Date and time</th>
         <th>Current byte count</th>
-        <th>Approximate word count<br><button id="check-all-wc" class="btn btn-default btn-xs">Check word count for pending articles</button></th>
+        <th>Approximate word count<br><button id="check-all-wc" class="btn btn-default btn-xs">Check all</button></th>
         <th>Verdict</th>
         <th>Remarks</th>
         <th>Checked by</th>

@@ -138,7 +138,7 @@ function get_page_size ($pageids = [], $wiki = "meta.wikimedia.org") {
             "action" => "query",
             "prop"   => "revisions",
             "format" => "json",
-            "rvprop" => "size",
+            "rvprop" => "size|timestamp",
             "pageids" => implode("|", $temp_pageids)
             );
         $temp_data = json_decode(api_query($params, $wiki), true);
@@ -511,7 +511,7 @@ function get_judged_articles($username, $wiki) {
     $page_content = $res[$judge_page_id]['revisions'][0]['*'];
 
     $data = [];
-    $regex = "/\* {{WAM\-art \| title = (.+) \| verdict = (.+) \| last_updated_by = ([^|]+)( \| remarks = (.*) )?}}/";
+    $regex = "/\* {{WAM\-art \| title = (.+) \| verdict = ([^|]*) \| last_updated_by = ([^|]*)( \| remarks = (.*) )?}}/";
     preg_match_all($regex, $page_content, $data);
     $article_judged = $data[1];
 
@@ -526,7 +526,7 @@ function get_verdict($username, $wiki) {
     $page_content = $res[$judge_page_id]['revisions'][0]['*'];
 
     $data = [];
-    $regex = "/\* {{WAM\-art \| title = (.+) \| verdict = (.+) \| last_updated_by = ([^|]+)( \| remarks = (.*) )?}}/";
+    $regex = "/\* {{WAM\-art \| title = (.+) \| verdict = ([^|]*) \| last_updated_by = ([^|]*)( \| remarks = (.*) )?}}/";
     preg_match_all($regex, $page_content, $data);
 
     $ret = [];
@@ -590,7 +590,7 @@ function do_judgement($verdict, $page_title, $username, $remarks, $wiki = "meta.
 
         if (in_array($page_title, $article_judged)) {
             // edit entry {{WAM-art | title = ... | verdict = ... | last_updated_by = ... | remarks = ... }}
-            $regex = "/\* {{WAM\-art \| title = " . preg_quote($page_title). " \| verdict = (.+) \| last_updated_by = ([^|]+)( \| remarks = (.*) )?}}/";
+            $regex = "/\* {{WAM\-art \| title = " . preg_quote($page_title). " \| verdict = ([^|]*) \| last_updated_by = ([^|]*)( \| remarks = (.*) )?}}/";
             $replacement = '* {{WAM-art'
                 . ' | title = '. $page_title
                 . ' | verdict = ' . $verdict

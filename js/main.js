@@ -14,8 +14,8 @@ $(document).ready(function () {
     });
     $("#check-all-wc").click(function () {
         $(".check-wc").each(function () {
-            if ($(this).data('status') === 'no')
-                return true; // continue
+            // if ($(this).data('status') === 'no')
+            //     return true; // continue
             $(this).click();
         });
         $(this).hide();
@@ -43,6 +43,32 @@ $(document).ready(function () {
                 $("#status").text("");
             }, 2000);
             $(this).addClass("active");
+        }.bind(this));
+    });
+    $("#manual-add").submit(function (e) {
+        e.preventDefault();
+        $("#status").text("Submiting...");
+        $("#manual-add-btn").attr("disabled", "disabled");
+        $.ajax({
+            url: "api/handler.php",
+            dataType: "json",
+            method: "post",
+            data: {
+                func: "do_judgement",
+                v: "pending",
+                x: $("#art-name").val(),
+                y: $(this).data('username'),
+                k: $("#art-remarks").val(),
+                z: $(this).data('wiki')
+            }
+        }).done(function(data) {
+            $("#manual-add-btn").removeAttr("disabled");
+            $("#status").text(data);
+            setTimeout(function () {
+                $("#status").text("");
+                $("#add-art").modal("hide");
+                window.location.reload();
+            }, 2000);
         }.bind(this));
     });
 });
