@@ -118,8 +118,31 @@ function get_page_text_content ($pageids = [], $wiki = "meta.wikimedia.org") {
 }
 
 function get_page_wordcount ($pageid, $wiki = "meta.wikimedia.org") {
+    global $settings;
     $text = get_page_text_content([$pageid], $wiki)['query']['pages'][$pageid]['extract'];
-    return count(preg_split('~[^\p{L}\p{N}\']+~u', utf8_encode($text)));
+    $enc = mb_detect_encoding($text, "UTF-8,ISO-8859-1");
+    $text = iconv($enc, "UTF-8", $text);
+
+    $cnt = 0;
+    if (in_array($wiki, $settings['CJK_wikis'])) {
+        $regex = '/[a-zA-Z0-9_\x{0392}-\x{03c9}\x{00c0}-\x{00ff}\x{0600}-\x{06ff}]+|[\x{4e00}-\x{9fff}\x{3400}-\x{4dbf}\x{f900}-\x{faff}\x{3040}-\x{309f}\x{ac00}-\x{d7af}]+/u';
+
+        preg_match_all($regex, $text, $m);
+        $m = $m[0];
+        $cnt = 0;
+        for ($i = 0; $i < count($m); $i++) {
+            if (utf8_char_code_at($m[$i], 0) >= 0x4e00) {
+             $cnt += mb_strlen($m[$i]);
+           } else {
+             $cnt += 1;
+           }
+        }
+    } else {
+        $regex = '/[\p{P}\p{Z}\p{S}\p{C}]+/u';
+        $cnt = count(preg_split($regex, $text));
+    }
+
+    return $cnt;
 }
 
 /**

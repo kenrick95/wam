@@ -68,10 +68,9 @@
             }
         }
         $newer_page_sizes = get_page_size($newer_pageids, $wiki)['query']['pages'];
-
         foreach ($newer_page_sizes as $page_id => $data) {
           $page_size = $data['revisions'][0]['size'];
-            $status = empty($all_verdicts[$data['title']])
+            $status = !empty($all_verdicts[$data['title']])
                 ? $all_verdicts[$data['title']]['verdict']
                 : "pending";
             $remarks = isset($all_verdicts[$data['title']]) ? $all_verdicts[$data['title']]['remarks'] : "";

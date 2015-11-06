@@ -61,3 +61,16 @@ function within_period ($time) {
 //     }
 //     echo "<b>{$prof_names[$size-1]}</b><br>";
 // }
+
+// http://stackoverflow.com/a/18499265/917957
+function utf8_char_code_at($str, $index)
+{
+    $char = mb_substr($str, $index, 1, 'UTF-8');
+
+    if (mb_check_encoding($char, 'UTF-8')) {
+        $ret = mb_convert_encoding($char, 'UTF-32BE', 'UTF-8');
+        return hexdec(bin2hex($ret));
+    } else {
+        return null;
+    }
+}

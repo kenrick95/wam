@@ -48,6 +48,48 @@
         </tr>
         <?php
         }
+
+        $newer_pageids = [];
+        foreach ($all_verdicts as $page_title => $data) {
+            if (!isset($page_shown[$page_title])) {
+                array_push($newer_pageids, get_page_id($page_title, $wiki));
+            }
+        }
+        $newer_page_sizes = get_page_size($newer_pageids, $wiki)['query']['pages'];
+        foreach ($newer_page_sizes as $page_id => $data) {
+          $page_size = $data['revisions'][0]['size'];
+            $status = !empty($all_verdicts[$data['title']])
+                ? $all_verdicts[$data['title']]['verdict']
+                : "pending";
+            $remarks = isset($all_verdicts[$data['title']]) ? $all_verdicts[$data['title']]['remarks'] : "";
+            $judged_by = isset($all_verdicts[$data['title']]) ? $all_verdicts[$data['title']]['last_updated_by'] : "";
+
+        ?>
+        <tr>
+            <td><a href="//<?= $wiki ?>/wiki/<?= $data['title'] ?>"><?= $data['title'] ?></a></td>
+            <td><?= date("j F Y, H:i:s", strtotime($data['revisions'][0]['timestamp'])) ?> (last edited)</td>
+            <td><?= $page_size ?></td>
+            <td><button class="btn btn-default check-wc btn-xs" data-status="<?= $status ?>" data-pageid="<?= $data['pageid'] ?>" data-wiki="<?= $wiki ?>">Check word count</button></td>
+            <td><!-- <?= $data['pageid'] ?> --><?php
+            if ($status === "yes") { ?>
+                <span class="label label-success">Yes</span>
+            <?php } else if ($status === "pending") { ?>
+                <span class="label label-warning">Pending</span>
+            <?php } else { ?>
+                <span class="label label-danger">No</span>
+            <?php } ?></td>
+            <td><?= $remarks ?></td>
+            <td><a href="//<?= $wiki ?>/wiki/User:<?= $judged_by ?>"><?= $judged_by ?></a></td>
+            <td>
+                <a class="btn btn-default btn-xs"
+                href="judging.php?pageid=<?= $data['pageid'] ?>&amp;username=<?= $username ?>&amp;wiki=<?= $wiki ?>">
+                    Judge
+                </a>
+            </td>
+        </tr>
+
+        <?php
+        }
     ?>
     </tbody>
     </table>

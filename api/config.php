@@ -1,5 +1,7 @@
 <?php
 date_default_timezone_set('UTC');
+header("Content-Type: text/html; charset=UTF-8");
+mb_internal_encoding("UTF-8");
 
 $settings['cookiefile'] = "cookies.tmp";
 $settings['period'] = [];
@@ -33,6 +35,9 @@ $settings['minimumWordCount'] = array(
     "pa.wikipedia.org" => 200,
     "*" => 300,
 );
+
+$settings['CJK_wikis'] = ["zh.wikipedia.org", "ja.wikipedia.org",
+    "ko.wikipedia.org", "zh-yue.wikipedia.org"];
 
 
 session_start();
