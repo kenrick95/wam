@@ -13,6 +13,7 @@
         $sav[$participants[$i]['wiki']] = 1;
         array_push($wiki_list, $participants[$i]['wiki']);
     }
+    sort($wiki_list);
     for ($i = 0; $i < count($wiki_list); $i++) {
     ?>
     <li><a href="<?= $__next_page; ?>.php?filter=<?= $wiki_list[$i] ?>"><?= $wiki_list[$i] ?></a></li>
