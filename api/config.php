@@ -27,12 +27,14 @@ $settings['minimumArticlePageSize'] = array(
     "az.wikipedia.org" => 3000,
     "uz.wikipedia.org" => 2500,
     "pa.wikipedia.org" => 2500,
+    "ml.wikipedia.org" => 2500,
     "*" => 3500,
 );
 $settings['minimumWordCount'] = array(
     "az.wikipedia.org" => 250,
     "uz.wikipedia.org" => 300,
     "pa.wikipedia.org" => 200,
+    "ml.wikipedia.org" => 20,
     "*" => 300,
 );
 

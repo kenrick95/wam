@@ -18,6 +18,7 @@
     </thead>
     <tbody>
     <?php
+        $page_shown = [];
         for ($i = 0; $i < count($all_pages); $i++) {
             if (isset($all_page_sizes[$all_pages[$i]['pageid']])) {
                 $page_size = $all_page_sizes[$all_pages[$i]['pageid']]['revisions'][0]['size'];
@@ -29,6 +30,7 @@
                 : (($page_size >= 3500) ? "pending" : "pending");
             $remarks = isset($all_verdicts[$all_pages[$i]['title']]) ? $all_verdicts[$all_pages[$i]['title']]['remarks'] : "";
             $judged_by = isset($all_verdicts[$all_pages[$i]['title']]) ? $all_verdicts[$all_pages[$i]['title']]['last_updated_by'] : "";
+            $page_shown[$all_pages[$i]['title']] = true;
         ?>
         <tr>
             <td><a href="//<?= $wiki ?>/wiki/<?= $all_pages[$i]['title'] ?>"><?= $all_pages[$i]['title'] ?></a></td>
