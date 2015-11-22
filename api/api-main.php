@@ -660,3 +660,33 @@ function do_judgement($verdict, $page_title, $username, $remarks, $wiki = "meta.
 
     return $res->edit->result;
 }
+
+
+function get_user_stats($username, $wiki = "meta.wikimedia.org") {
+  $judged = get_verdict($username, $wiki);
+  $all = get_all_new_pages_of_user($username, $wiki)['query']['usercontribs'];
+
+  $appeared = [];
+
+  $cnt = array("yes" => 0, "pending" => 0, "no" => 0);
+
+  if ($judged) {
+    foreach ($judged as $title => $obj) {
+      $cnt[$obj['verdict']]++;
+      $appeared[$title] = 1;
+    }
+  }
+
+  if ($all) {
+    foreach ($all as $idx => $obj) {
+      if (!isset($appeared[$obj['title']])) {
+        $appeared[$obj['title']] = 1;
+        $cnt['pending']++;
+      }
+    }
+  }
+
+  $cnt['all'] = $cnt['yes'] + $cnt['no'] + $cnt['pending'];
+
+  return $cnt;
+}

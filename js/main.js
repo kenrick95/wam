@@ -71,4 +71,38 @@ $(document).ready(function () {
             }, 2000);
         }.bind(this));
     });
+    $(".check-stats").click(function () {
+        $(this).attr("disabled", "disabled");
+        $.ajax({
+            url: "api/handler.php",
+            dataType: "json",
+            data: {
+                func: "get_user_stats",
+                x: $(this).data('username'),
+                y: $(this).data('wiki')
+            }
+        }).done(function(data) {
+            $(this).parent().removeAttr("colspan");
+            $(this).parent().parent().append($("<td/>", {
+              text: data.yes + data.no
+            }));
+            $(this).parent().parent().append($("<td/>", {
+              text: data.pending
+            }));
+            $(this).parent().parent().append($("<td/>", {
+              text: data.yes
+            }));
+            $(this).parent().parent().append($("<td/>", {
+              text: data.no
+            }));
+            $(this).replaceWith(data.all);
+
+        }.bind(this));
+    });
+    $("#check-all-stats").click(function () {
+        $(".check-stats").each(function () {
+            $(this).click();
+        });
+        $(this).hide();
+    });
 });

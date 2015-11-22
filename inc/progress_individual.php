@@ -82,12 +82,6 @@
             <?php } ?></td>
             <td><?= $remarks ?></td>
             <td><a href="//<?= $wiki ?>/wiki/User:<?= $judged_by ?>"><?= $judged_by ?></a></td>
-            <td>
-                <a class="btn btn-default btn-xs"
-                href="judging.php?pageid=<?= $data['pageid'] ?>&amp;username=<?= $username ?>&amp;wiki=<?= $wiki ?>">
-                    Judge
-                </a>
-            </td>
         </tr>
 
         <?php
