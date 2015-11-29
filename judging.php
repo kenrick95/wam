@@ -1,7 +1,17 @@
 <?php
 require_once("api/api-main.php");
+if (isset($_GET['retry'])) {
+  session_start();
+  $settings['gTokenKey'] = '';
+  $settings['gTokenSecret'] = '';
+  $settings['loggedinUsername'] = '';
+  unset($_SESSION['tokenKey']);
+  unset($_SESSION['tokenSecret']);
+  unset($_SESSION['loggedinUsername']);
+  session_write_close();
+}
 if (empty($settings['gTokenKey'])) {
-    doAuthorizationRedirect();
+  doAuthorizationRedirect();
 }
 
 // fetch list the organizers
@@ -12,6 +22,7 @@ if (empty($settings['loggedinUsername'])){
 }
 // match current OAuth-ed user with that list
 $okay = in_array(str_replace(" ", "_", trim($settings['loggedinUsername'])), $organizers);
+
 
 $_current_page = "judging";
 $pageid = isset($_GET["pageid"]) ? $_GET["pageid"] : "";
@@ -49,7 +60,16 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : '';
         if (!$okay) {
             ?>
             <div class="alert alert-danger" role="alert">
-                You can't access this section because you are not the organizer in any wiki. Probably you want to check <a href="progress.php">your progress</a>.
+                You can't access this section because you are not the organizer in any wiki. Probably you want to check <a href="progress.php">your progress</a>.<hr>
+                If you think this is an error, try <a href="judging.php?retry=1">reauthorize this tool</a>. If it's still not working, please <a href="https://meta.wikimedia.org/wiki/Special:EmailUser/Kenrick95">contact Kenrick</a>.
+            </div>
+            <div class="well">
+            <b>Debug:</b><br>
+            Current username: <?= $settings['loggedinUsername'] ?><br>
+            Organizer List:
+            <?php
+            print_r($organizers);
+            ?>
             </div>
             <?php
         } else if (!empty($pageid) && !empty($username) && !empty($wiki)) {
