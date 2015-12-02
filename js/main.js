@@ -83,19 +83,63 @@ $(document).ready(function () {
             }
         }).done(function(data) {
             $(this).parent().removeAttr("colspan");
+
+            if ($(this).data('enhanced')) {
+              $(this).parent().parent().append($("<td/>", {
+                html: $("<span/>", {
+                  class: "label label-default",
+                  text: data.all
+                })
+              }));
+            }
             $(this).parent().parent().append($("<td/>", {
-              text: data.yes + data.no
+              html: $("<span/>", {
+                class: "label label-default",
+                text: data.yes + data.no
+              })
             }));
             $(this).parent().parent().append($("<td/>", {
-              text: data.pending
+              html: $("<span/>", {
+                class: "label label-warning",
+                text: data.pending
+              })
             }));
             $(this).parent().parent().append($("<td/>", {
-              text: data.yes
+              html: $("<span/>", {
+                class: "label label-success",
+                text: data.yes
+              })
             }));
+            if ($(this).data('enhanced')) {
+                $(this).parent().parent().append($("<td/>", {
+                  html: $("<span/>", {
+                    class: "label label-success",
+                    text: data.byte_yes + " bytes"
+                  })
+                }));
+            }
+
             $(this).parent().parent().append($("<td/>", {
-              text: data.no
+              html: $("<span/>", {
+                class: "label label-danger",
+                text: data.no
+              })
             }));
-            $(this).replaceWith(data.all);
+            if ($(this).data('enhanced')) {
+              var label_msg = 'label label-default';
+              if (Date.parse(data.reg_date) >= Date.parse("2015-10-15T00:00:00Z")) {
+                label_msg = 'label label-primary';
+              }
+              $(this).replaceWith($("<span/>", {
+                class: label_msg,
+                text: data.reg_date
+              }));
+            } else {
+              $(this).replaceWith($("<span/>", {
+                class: "label label-default",
+                text: data.all
+              }));
+            }
 
         }.bind(this));
     });

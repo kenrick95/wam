@@ -175,6 +175,36 @@ function get_page_size ($pageids = [], $wiki = "meta.wikimedia.org") {
     }
 
     return $data;
+}/**
+ * Get page size of a page using page titles
+ * @param  array  $titles Array of page titles
+ * @return [type]         [description]
+ */
+function get_page_size_using_title ($titles = [], $wiki = "meta.wikimedia.org") {
+    $data = null;
+    $cnt = 0;
+    while ($cnt * 50 < count($titles)) {
+        $temp_pagetitles = array_slice($titles, $cnt * 50, 50);
+
+        $cnt++;
+        $params = array(
+            "action" => "query",
+            "prop"   => "revisions",
+            "format" => "json",
+            "rvprop" => "size|timestamp",
+            "titles" => implode("|", $temp_pagetitles)
+            );
+        $temp_data = json_decode(api_query($params, $wiki), true);
+        if ($data === null)
+            $data = $temp_data;
+        else {
+            foreach ($temp_data['query']['pages'] as $key => $value) {
+                $data['query']['pages'][$key] = $temp_data['query']['pages'][$key];
+            }
+        }
+    }
+
+    return $data;
 }
 
 function get_meta_page () {
@@ -660,20 +690,35 @@ function do_judgement($verdict, $page_title, $username, $remarks, $wiki = "meta.
 
     return $res->edit->result;
 }
-
-
+function get_user_registration_date($username, $wiki = "meta.wikimedia.org") {
+    $params = array(
+        "action" => "query",
+        "list" => "users",
+        "format" => "json",
+        "usprop" => "registration",
+        "ususers" => $username
+        );
+    return json_decode(api_query($params, $wiki), true)['query']['users'];
+}
 function get_user_stats($username, $wiki = "meta.wikimedia.org") {
   $judged = get_verdict($username, $wiki);
   $all = get_all_new_pages_of_user($username, $wiki)['query']['usercontribs'];
+  $titles_yes = [];
 
   $appeared = [];
 
-  $cnt = array("yes" => 0, "pending" => 0, "no" => 0);
+  $cnt = array("yes" => 0, "pending" => 0, "no" => 0, "byte_yes" => 0,
+      "reg_date" => 0);
+
+  $cnt['reg_date'] = get_user_registration_date($username, $wiki)[0]['registration'];
+
 
   if ($judged) {
     foreach ($judged as $title => $obj) {
       $cnt[$obj['verdict']]++;
       $appeared[$title] = 1;
+      if ($obj['verdict'] == 'yes')
+        array_push($titles_yes, $title);
     }
   }
 
@@ -683,6 +728,14 @@ function get_user_stats($username, $wiki = "meta.wikimedia.org") {
         $appeared[$obj['title']] = 1;
         $cnt['pending']++;
       }
+    }
+
+  }
+  $all_page_sizes = get_page_size_using_title($titles_yes, $wiki)['query']['pages'];
+  if ($all_page_sizes) {
+    foreach ($all_page_sizes as $k => $v) {
+      if (isset($v['revisions']))
+        $cnt['byte_yes'] += intval($v['revisions'][0]['size']);
     }
   }
 

@@ -98,7 +98,12 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : '';
         } else {
             $participants = get_participants_list();
             if (!empty($filter)) {
-                require_once("inc/judge_participant_list.php");
+                if ($filter == 'all') {
+                  require_once("inc/judge_all_participant_list.php");
+                } else {
+                  require_once("inc/judge_participant_list.php");
+                }
+
             } else {
                 require_once("inc/judge_wiki_list.php");
             }
