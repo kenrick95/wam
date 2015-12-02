@@ -710,7 +710,14 @@ function get_user_stats($username, $wiki = "meta.wikimedia.org") {
   $cnt = array("yes" => 0, "pending" => 0, "no" => 0, "byte_yes" => 0,
       "reg_date" => 0);
 
-  $cnt['reg_date'] = get_user_registration_date($username, $wiki)[0]['registration'];
+  $cnt['reg_date'] = get_user_registration_date($username, $wiki);
+  if (isset($cnt['reg_date'][0]['registration'])) {
+    $cnt['reg_date'] = $cnt['reg_date'][0]['registration'];
+  } else if (isset($cnt['reg_date'][0]['missing'])) {
+    $cnt['reg_date'] = -1;
+  } else {
+    $cnt['reg_date'] = 0;
+  }
 
 
   if ($judged) {

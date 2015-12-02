@@ -127,7 +127,12 @@ $(document).ready(function () {
             }));
             if ($(this).data('enhanced')) {
               var label_msg = 'label label-default';
-              if (Date.parse(data.reg_date) >= Date.parse("2015-10-15T00:00:00Z")) {
+              if (data.reg_date === 0) {
+                data.reg_date = "Very old users";
+              } else if (data.reg_date === -1) {
+                data.reg_date = "User not found";
+                label_msg = "label label-danger";
+              } else if (Date.parse(data.reg_date) >= Date.parse("2015-10-15T00:00:00Z")) {
                 label_msg = 'label label-primary';
               }
               $(this).replaceWith($("<span/>", {
