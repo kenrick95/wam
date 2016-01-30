@@ -1,11 +1,9 @@
 <?php
 require_once("config.php");
 require_once("utils.php");
-function api_query ($params, $wiki = "meta.wikimedia.org") {
-    if (is_array($params)) {
-        $params = array_to_string($params, "&", "=");
-    }
 
+
+function api_query ($params, $wiki = "meta.wikimedia.org") {
     global $settings;
     $url = "http://" . $wiki . "/w/api.php?action=query&format=json";
     $data = http_request($url, $params);
@@ -208,25 +206,21 @@ function get_page_size_using_title ($titles = [], $wiki = "meta.wikimedia.org") 
 }
 
 function get_meta_page () {
-    return get_page_content_html("Wikipedia_Asian_Month", "meta.wikimedia.org");
+    return get_page_content_html("Wikipedia_Asian_Month/2015_Edition", "meta.wikimedia.org");
 }
 function get_page_content_html ($title, $wiki = "meta.wikimedia.org") {
     $title = rawurlencode($title);
-    $url = "http://$wiki/api/rest_v1/page/html/$title";
+    $url = "https://$wiki/api/rest_v1/page/html/$title";
     $params = "";
     $raw_data = http_request($url, $params);
     if (empty($raw_data)) {
         throw new Exception("No data received from server. Check that API is enabled.");
     }
-    $stylesheet = explode("<link rel=\"stylesheet\" href=\"", $raw_data)[1];
-    $stylesheet = explode("\"/>", $stylesheet)[0];
 
     preg_match_all("/<body[^>]*>(.*?)<\/body>/is", $raw_data, $data);
     $data = $data[1][0];
     $data = str_replace("./", "//$wiki/wiki/", $data);
 
-    //$ret = "<link rel=\"stylesheet\" href=\"" . $stylesheet . "\"/>"
-    //    . $data;
     $ret = $data;
     return $ret;
 }
@@ -345,7 +339,7 @@ function sign_request( $method, $url, $params = array() ) {
  * Request authorization
  * @return void
  */
-function doAuthorizationRedirect() {
+function oauth_auth_redirect() {
     global $settings;
 
     // First, we need to fetch a request token.
@@ -368,19 +362,7 @@ function doAuthorizationRedirect() {
     ) );
     $signature = sign_request( 'GET', $url );
     $url .= "&oauth_signature=" . urlencode( $signature );
-    $ch = curl_init();
-    curl_setopt( $ch, CURLOPT_URL, $url );
-    curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
-    curl_setopt( $ch, CURLOPT_USERAGENT, $settings['gUserAgent'] );
-    curl_setopt( $ch, CURLOPT_HEADER, 0 );
-    curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-    $data = curl_exec( $ch );
-    if ( !$data ) {
-        header( "HTTP/1.1 {$settings['errorCode']} Internal Server Error" );
-        echo 'Curl error: ' . htmlspecialchars( curl_error( $ch ) );
-        exit(0);
-    }
-    curl_close( $ch );
+    $data = http_request($url);
     $token = json_decode( $data );
     if ( is_object( $token ) && isset( $token->error ) ) {
         header( "HTTP/1.1 {$settings['errorCode']} Internal Server Error" );
@@ -414,7 +396,7 @@ function doAuthorizationRedirect() {
  * Handle a callback to fetch the access token
  * @return void
  */
-function fetchAccessToken() {
+function fetch_oauth_access_token() {
     global $settings;
 
     $url = $settings['mwOAuthUrl'] . '/token';
@@ -435,18 +417,7 @@ function fetchAccessToken() {
     ) );
     $signature = sign_request( 'GET', $url );
     $url .= "&oauth_signature=" . urlencode( $signature );
-    $ch = curl_init();
-    curl_setopt( $ch, CURLOPT_URL, $url );
-    curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
-    curl_setopt( $ch, CURLOPT_USERAGENT, $settings['gUserAgent'] );
-    curl_setopt( $ch, CURLOPT_HEADER, 0 );
-    curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-    $data = curl_exec( $ch );
-    if ( !$data ) {
-        header( "HTTP/1.1 {$settings['errorCode']} Internal Server Error" );
-        echo 'Curl error: ' . htmlspecialchars( curl_error( $ch ) );
-        exit(0);
-    }
+    $data = http_request($url);
     $token = json_decode( $data );
     if ( is_object( $token ) && isset( $token->error ) ) {
         header( "HTTP/1.1 {$settings['errorCode']} Internal Server Error" );
@@ -459,8 +430,6 @@ function fetchAccessToken() {
         exit(0);
     }
 
-    curl_close( $ch );
-
     // Save the access token
     session_start();
     $_SESSION['tokenKey'] = $settings['gTokenKey'] = $token->key;
@@ -471,7 +440,7 @@ function fetchAccessToken() {
 function fetch_current_username() {
     // Fetch the username
     $ch = null;
-    $res = doApiQuery( array(
+    $res = signed_api_query( array(
         'format' => 'json',
         'action' => 'query',
         'meta' => 'userinfo',
@@ -505,10 +474,9 @@ function fetch_current_username() {
  * Send an API query with OAuth authorization
  *
  * @param array $post Post data
- * @param object $ch Curl handle
  * @return array API results
  */
-function doApiQuery( $post, &$ch = null ) {
+function signed_api_query( $post) {
     global $settings;
 
     $headerArr = array(
@@ -531,23 +499,8 @@ function doApiQuery( $post, &$ch = null ) {
     }
     $header = 'Authorization: OAuth ' . join( ', ', $header );
 
-    if ( !$ch ) {
-        $ch = curl_init();
-    }
-    curl_setopt( $ch, CURLOPT_POST, true );
-    curl_setopt( $ch, CURLOPT_URL, $settings['apiUrl'] );
-    curl_setopt( $ch, CURLOPT_POSTFIELDS, http_build_query( $post ) );
-    curl_setopt( $ch, CURLOPT_HTTPHEADER, array( $header ) );
-    curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
-    curl_setopt( $ch, CURLOPT_USERAGENT, $settings['gUserAgent'] );
-    curl_setopt( $ch, CURLOPT_HEADER, 0 );
-    curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-    $data = curl_exec( $ch );
-    if ( !$data ) {
-        header( "HTTP/1.1 {$settings['errorCode']} Internal Server Error" );
-        echo 'Curl error: ' . htmlspecialchars( curl_error( $ch ) );
-        exit(0);
-    }
+    $data = http_request($settings['apiUrl'], $post, $header);
+
     $ret = json_decode( $data );
     if ( $ret === null ) {
         header( "HTTP/1.1 {$settings['errorCode']} Internal Server Error" );
@@ -604,7 +557,7 @@ function do_judgement($verdict, $page_title, $username, $remarks, $wiki = "meta.
     $ch = null;
 
     // First fetch the username
-    $res = doApiQuery( array(
+    $res = signed_api_query( array(
         'format' => 'json',
         'action' => 'query',
         'meta' => 'userinfo',
@@ -665,7 +618,7 @@ function do_judgement($verdict, $page_title, $username, $remarks, $wiki = "meta.
     }
 
     // Next fetch the edit token
-    $res = doApiQuery( array(
+    $res = signed_api_query( array(
         'format' => 'json',
         'action' => 'tokens',
         'type' => 'edit',
@@ -678,7 +631,7 @@ function do_judgement($verdict, $page_title, $username, $remarks, $wiki = "meta.
     $token = $res->tokens->edittoken;
 
     // Now perform the edit
-    $res = doApiQuery( array(
+    $res = signed_api_query( array(
         'format' => 'json',
         'action' => 'edit',
         'title' => $edit_page,

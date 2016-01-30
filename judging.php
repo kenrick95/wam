@@ -1,5 +1,9 @@
 <?php
 require_once("api/api-main.php");
+if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
+    fetch_oauth_access_token();
+}
+
 if (isset($_GET['retry'])) {
   session_start();
   $settings['gTokenKey'] = '';
@@ -11,11 +15,13 @@ if (isset($_GET['retry'])) {
   session_write_close();
 }
 if (empty($settings['gTokenKey'])) {
-  doAuthorizationRedirect();
+  oauth_auth_redirect();
 }
 
 // fetch list the organizers
 $organizers = get_organizers_list();
+
+
 
 if (empty($settings['loggedinUsername'])){
     $settings['loggedinUsername'] = fetch_current_username();

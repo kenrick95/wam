@@ -52,6 +52,3 @@ if ( isset( $_SESSION['tokenKey'] ) ) {
 
 }
 session_write_close();
-if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
-    fetchAccessToken();
-}
