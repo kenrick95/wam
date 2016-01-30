@@ -68,6 +68,9 @@
             }
         }
         $newer_page_sizes = get_page_size($newer_pageids, $wiki)['query']['pages'];
+        if (count($newer_page_sizes) === 0) {
+          $newer_page_sizes = array();
+        }
         foreach ($newer_page_sizes as $page_id => $data) {
           $page_size = $data['revisions'][0]['size'];
             $status = !empty($all_verdicts[$data['title']])
