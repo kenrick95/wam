@@ -212,7 +212,7 @@ function get_meta_page () {
 }
 function get_page_content_html ($title, $wiki = "meta.wikimedia.org") {
     $title = rawurlencode($title);
-    $url = "http://rest.wikimedia.org/$wiki/v1/page/html/$title";
+    $url = "http://$wiki/api/rest_v1/page/html/$title";
     $params = "";
     $raw_data = http_request($url, $params);
     if (empty($raw_data)) {
