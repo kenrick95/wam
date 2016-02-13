@@ -3,8 +3,9 @@ require_once("config.php");
 require_once("utils.php");
 
 
-function api_query ($params, $wiki = "meta.wikimedia.org") {
+function api_query ($params, $wiki = null) {
     global $settings;
+    $wiki = isset($wiki) ? $wiki : $settings['main_page_wiki'];
     $url = "http://" . $wiki . "/w/api.php?action=query&format=json";
     $data = http_request($url, $params);
     if (empty($data)) {
@@ -12,11 +13,12 @@ function api_query ($params, $wiki = "meta.wikimedia.org") {
     }
     return $data;
 }
-function get_new_pages_of_user ($user = "", $wiki = "meta.wikimedia.org", $limit = 500, $uccontinue) {
+function get_new_pages_of_user ($user = "", $wiki = null, $limit = 500, $uccontinue) {
     if (empty($limit)) {
         $limit = 500;
     }
     global $settings;
+    $wiki = isset($wiki) ? $wiki : $settings['main_page_wiki'];
 
     $params = array(
         "action" => "query",
@@ -43,8 +45,10 @@ function get_new_pages_of_user ($user = "", $wiki = "meta.wikimedia.org", $limit
  * @param  array  $pageids Array of page IDs
  * @return [type]         [description]
  */
-function get_page_content ($pageids = [], $wiki = "meta.wikimedia.org") {
-    $params = array(
+function get_page_content ($pageids = [], $wiki = null) {
+    global $settings;
+    $wiki = isset($wiki) ? $wiki : $settings['main_page_wiki'];
+    $params = array(    
         "action" => "query",
         "prop" => "revisions",
         "format" => "json",
@@ -59,7 +63,9 @@ function get_page_content ($pageids = [], $wiki = "meta.wikimedia.org") {
  * @param  string  $page_title
  * @return [type]         [description]
  */
-function get_page_content_using_title ($page_title, $wiki = "meta.wikimedia.org") {
+function get_page_content_using_title ($page_title, $wiki = null) {
+    global $settings;
+    $wiki = isset($wiki) ? $wiki : $settings['main_page_wiki'];
     $params = array(
         "action" => "query",
         "prop" => "revisions",
@@ -75,7 +81,9 @@ function get_page_content_using_title ($page_title, $wiki = "meta.wikimedia.org"
  * @param  integer  $pageid page ID
  * @return string   page title
  */
-function get_page_title ($pageid, $wiki = "meta.wikimedia.org") {
+function get_page_title ($pageid, $wiki = null) {
+    global $settings;
+    $wiki = isset($wiki) ? $wiki : $settings['main_page_wiki'];
     $params = array(
         "action" => "query",
         "prop" => "info",
@@ -89,7 +97,9 @@ function get_page_title ($pageid, $wiki = "meta.wikimedia.org") {
  * @param  integer  $pageid page ID
  * @return string   page title
  */
-function get_page_id ($title, $wiki = "meta.wikimedia.org") {
+function get_page_id ($title, $wiki = null) {
+    global $settings;
+    $wiki = isset($wiki) ? $wiki : $settings['main_page_wiki'];
     $params = array(
         "action" => "query",
         "prop" => "info",
@@ -104,8 +114,10 @@ function get_page_id ($title, $wiki = "meta.wikimedia.org") {
  * @param  array  $pageids Array of page IDs
  * @return [type]         [description]
  */
-function get_page_text_content ($pageids = [], $wiki = "meta.wikimedia.org") {
-    $params = array(
+function get_page_text_content ($pageids = [], $wiki = null) {
+    global $settings;
+    $wiki = isset($wiki) ? $wiki : $settings['main_page_wiki'];
+    $params = array(    
         "action" => "query",
         "prop" => "extracts",
         "format" => "json",
@@ -115,8 +127,9 @@ function get_page_text_content ($pageids = [], $wiki = "meta.wikimedia.org") {
     return json_decode(api_query($params, $wiki), true);
 }
 
-function get_page_wordcount ($pageid, $wiki = "meta.wikimedia.org") {
+function get_page_wordcount ($pageid, $wiki = null) {
     global $settings;
+    $wiki = isset($wiki) ? $wiki : $settings['main_page_wiki'];
     $text = get_page_text_content([$pageid], $wiki)['query']['pages'][$pageid]['extract'];
     $enc = mb_detect_encoding($text, "UTF-8,ISO-8859-1");
     $text = iconv($enc, "UTF-8", $text);
@@ -148,7 +161,9 @@ function get_page_wordcount ($pageid, $wiki = "meta.wikimedia.org") {
  * @param  array  $pageids Array of page IDs
  * @return [type]         [description]
  */
-function get_page_size ($pageids = [], $wiki = "meta.wikimedia.org") {
+function get_page_size ($pageids = [], $wiki = null) {
+    global $settings;
+    $wiki = isset($wiki) ? $wiki : $settings['main_page_wiki'];
     $data = null;
     $cnt = 0;
     while ($cnt * 50 < count($pageids)) {
@@ -178,7 +193,9 @@ function get_page_size ($pageids = [], $wiki = "meta.wikimedia.org") {
  * @param  array  $titles Array of page titles
  * @return [type]         [description]
  */
-function get_page_size_using_title ($titles = [], $wiki = "meta.wikimedia.org") {
+function get_page_size_using_title ($titles = [], $wiki = null) {
+    global $settings;
+    $wiki = isset($wiki) ? $wiki : $settings['main_page_wiki'];
     $data = null;
     $cnt = 0;
     while ($cnt * 50 < count($titles)) {
@@ -205,10 +222,13 @@ function get_page_size_using_title ($titles = [], $wiki = "meta.wikimedia.org") 
     return $data;
 }
 
-function get_meta_page () {
-    return get_page_content_html("Wikipedia_Asian_Month/2015_Edition", "meta.wikimedia.org");
+function get_main_page () {
+    global $settings;
+    return get_page_content_html($settings['main_page_title'], $settings['main_page_wiki']);
 }
-function get_page_content_html ($title, $wiki = "meta.wikimedia.org") {
+function get_page_content_html ($title, $wiki = null) {
+    global $settings;
+    $wiki = isset($wiki) ? $wiki : $settings['main_page_wiki'];
     $title = rawurlencode($title);
     $url = "https://$wiki/api/rest_v1/page/html/$title";
     $params = "";
@@ -225,7 +245,9 @@ function get_page_content_html ($title, $wiki = "meta.wikimedia.org") {
     return $ret;
 }
 
-function get_all_new_pages_of_user ($user = "", $wiki = "meta.wikimedia.org") {
+function get_all_new_pages_of_user ($user = "", $wiki = null) {
+    global $settings;
+    $wiki = isset($wiki) ? $wiki : $settings['main_page_wiki'];
     $data = null;
     $temp_data = null;
     $uccontinue = "";
@@ -248,11 +270,10 @@ function get_all_new_pages_of_user ($user = "", $wiki = "meta.wikimedia.org") {
 
 
 function get_participants_list() {
-    // [[meta:Wikipedia_Asian_Month/Participants]]
-    $raw_data = get_page_content([9086071])['query']['pages'][9086071]['revisions'][0]['*'];
+    global $settings;
+    $raw_data = get_page_content([$settings['participant_list_page_id']])['query']['pages'][$settings['participant_list_page_id']]['revisions'][0]['*'];
 
     preg_match_all("/{{target\s*\|\s*user\s*=\s*(.+)\s*\|\s*site\s*=\s*(.+)\s*}}/", $raw_data, $data);
-    //var_dump($data);
     $ret = [];
     for ($i = 1; $i < count($data[2]); $i++) {
         array_push($ret, array(
@@ -260,22 +281,19 @@ function get_participants_list() {
             "wiki" =>trim($data[2][$i])
         ));
     }
-    //var_dump($ret);
     return $ret;
 }
 
 
 function get_organizers_list() {
-    // [[meta:Wikipedia_Asian_Month/Organizers]]
-    $raw_data = get_page_content([8962039])['query']['pages'][8962039]['revisions'][0]['*'];
+    global $settings;
+    $raw_data = get_page_content([$settings['organizer_list_page_id']])['query']['pages'][$settings['organizer_list_page_id']]['revisions'][0]['*'];
 
     preg_match_all("/{{target\s*\|\s*user\s*=\s*(.+)\s*\|\s*site\s*=\s*(.+)\s*}}/", $raw_data, $data);
-    //var_dump($data);
     $ret = [];
     for ($i = 1; $i < count($data[2]); $i++) {
         array_push($ret, str_replace(" ", "_", trim($data[1][$i])));
     }
-    //var_dump($ret);
     return $ret;
 }
 
@@ -510,21 +528,29 @@ function signed_api_query( $post) {
     return $ret;
 }
 
-function get_judged_articles($username, $wiki) {
-    $judge_page = 'Wikipedia Asian Month/Judging/' . $wiki . "/" . $username;
+function get_judged_articles($username, $wiki = null) {
+    global $settings;
+    $wiki = isset($wiki) ? $wiki : $settings['main_page_wiki'];
+    
+    $judge_page = str_replace(array("[wiki]", "[username]"), array($wiki, $username), $settings['judge_page_pattern']);
+
     $res = get_page_content_using_title($judge_page)['query']['pages'];
     $judge_page_id = key($res);
     $page_content = $res[$judge_page_id]['revisions'][0]['*'];
 
     $data = [];
-    $regex = "/\* {{WAM\-art \| title = (.+) \| verdict = ([^|]*) \| last_updated_by = ([^|]*)( \| remarks = (.*) )?}}/";
+    $regex = $settings['judge_verdict_pattern'];
     preg_match_all($regex, $page_content, $data);
     $article_judged = $data[1];
 
     return array($article_judged, $page_content);
 }
-function get_verdict($username, $wiki) {
-    $judge_page = 'Wikipedia Asian Month/Judging/' . $wiki . "/" . $username;
+function get_verdict($username, $wiki = null) {
+    global $settings;
+    $wiki = isset($wiki) ? $wiki : $settings['main_page_wiki'];
+    
+    $judge_page = str_replace(array("[wiki]", "[username]"), array($wiki, $username), $settings['judge_page_pattern']);
+    
     $res = get_page_content_using_title($judge_page)['query']['pages'];
     $judge_page_id = key($res);
     if ($judge_page_id < 0)
@@ -532,7 +558,7 @@ function get_verdict($username, $wiki) {
     $page_content = $res[$judge_page_id]['revisions'][0]['*'];
 
     $data = [];
-    $regex = "/\* {{WAM\-art \| title = (.+) \| verdict = ([^|]*) \| last_updated_by = ([^|]*)( \| remarks = (.*) )?}}/";
+    $regex = $settings['judge_verdict_pattern'];
     preg_match_all($regex, $page_content, $data);
 
     $ret = [];
@@ -551,8 +577,9 @@ function get_verdict($username, $wiki) {
  * Save a judgement to meta-wiki
  * @return void
  */
-function do_judgement($verdict, $page_title, $username, $remarks, $wiki = "meta.wikimedia.org") {
+function do_judgement($verdict, $page_title, $username, $remarks, $wiki = null) {
     global $settings;
+    $wiki = isset($wiki) ? $wiki : $settings['main_page_wiki'];
 
     $ch = null;
 
@@ -582,7 +609,7 @@ function do_judgement($verdict, $page_title, $username, $remarks, $wiki = "meta.
     }
     $current_username = $res->query->userinfo->name;
 
-    $edit_page = 'Wikipedia Asian Month/Judging/' . $wiki . "/" . $username;
+    $edit_page = str_replace(array("[wiki]", "[username]"), array($wiki, $username), $settings['judge_page_pattern']);
     $edit_page_id = get_page_id($edit_page);
 
     $edit_text = "";
@@ -596,24 +623,21 @@ function do_judgement($verdict, $page_title, $username, $remarks, $wiki = "meta.
 
         if (in_array($page_title, $article_judged)) {
             // edit entry {{WAM-art | title = ... | verdict = ... | last_updated_by = ... | remarks = ... }}
-            $regex = "/\* {{WAM\-art \| title = " . preg_quote($page_title). " \| verdict = ([^|]*) \| last_updated_by = ([^|]*)( \| remarks = (.*) )?}}/";
-            $replacement = '* {{WAM-art'
-                . ' | title = '. $page_title
-                . ' | verdict = ' . $verdict
-                . ' | last_updated_by = ' . $current_username
-                . ' | remarks = ' . $remarks . ' }}';
+            // $regex = "/\* {{WAM\-art \| title = " . preg_quote($page_title). " \| verdict = ([^|]*) \| last_updated_by = ([^|]*)( \| remarks = (.*) )?}}/";
+            $regex = str_replace_first("(.+)", preg_quote($page_title), $settings['judge_verdict_pattern'], 1);
+            $replacement = str_replace(array("[page_title]", "[verdict]", "[current_username]", "[remarks]"), array($page_title, $verdict, $current_username, $remarks), $settings['judge_verdict_wikitext_pattern']);
 
             $edit_text = preg_replace($regex, $replacement, $page_content);
 
         } else {
             // append entry {{WAM-art | title = ... | verdict = ... | last_updated_by = ... | remarks = ... }}
-            $edit_text = $page_content . "\n* {{WAM-art | title = $page_title | verdict = $verdict | last_updated_by = $current_username | remarks = $remarks }}";
+            $edit_text = $page_content . "\n" . str_replace(array("[page_title]", "[verdict]", "[current_username]", "[remarks]"), array($page_title, $verdict, $current_username, $remarks), $settings['judge_verdict_wikitext_pattern']);
 
         }
     } else {
         // $edit_page does not exist
         // input entry {{WAM-art | title = ... | verdict = ... | last_updated_by = ... | remarks = ... }}
-        $edit_text = "* {{WAM-art | title = $page_title | verdict = $verdict | last_updated_by = $current_username | remarks = $remarks }}";
+        $edit_text = str_replace(array("[page_title]", "[verdict]", "[current_username]", "[remarks]"), array($page_title, $verdict, $current_username, $remarks), $settings['judge_verdict_wikitext_pattern']);
 
     }
 
@@ -636,14 +660,17 @@ function do_judgement($verdict, $page_title, $username, $remarks, $wiki = "meta.
         'action' => 'edit',
         'title' => $edit_page,
         'text' => $edit_text,
-        'summary' => '[[Wikipedia Asian Month|WAM]]: Give ' . $verdict . ' verdict on article ' . $page_title . ' for user ' . $username . ' of '. $wiki,
+        'summary' => str_replace(array("[wiki]", "[username]", "[verdict]", "[page_title]"), array($wiki, $username, $verdict, $page_title), $settings['judge_edit_summary_pattern']),
         'watchlist' => 'nochange',
         'token' => $token,
     ), $ch );
 
     return $res->edit->result;
 }
-function get_user_registration_date($username, $wiki = "meta.wikimedia.org") {
+function get_user_registration_date($username, $wiki = null) {
+    global $settings;
+    $wiki = isset($wiki) ? $wiki : $settings['main_page_wiki'];
+    
     $params = array(
         "action" => "query",
         "list" => "users",
@@ -653,7 +680,10 @@ function get_user_registration_date($username, $wiki = "meta.wikimedia.org") {
         );
     return json_decode(api_query($params, $wiki), true)['query']['users'];
 }
-function get_user_stats($username, $wiki = "meta.wikimedia.org") {
+function get_user_stats($username, $wiki = null) {
+  global $settings;
+  $wiki = isset($wiki) ? $wiki : $settings['main_page_wiki'];
+  
   $judged = get_verdict($username, $wiki);
   $all = get_all_new_pages_of_user($username, $wiki)['query']['usercontribs'];
   $titles_yes = [];

@@ -7,7 +7,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="index.php">Wikipedia Asian Month</a>
+            <a class="navbar-brand" href="index.php"><?= $settings['site_name']; ?></a>
         </div>
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
@@ -16,7 +16,7 @@
             </ul>
 
             <ul class="nav navbar-nav navbar-right">
-            <li><a href="https://meta.wikimedia.org/wiki/Talk:Wikipedia_Asian_Month">Talk page</a></li>
+            <li><a href="<?= $settings['talk_page_link'] ?>">Talk page</a></li>
             <li<?php if ($_current_page == "judging") { echo " class=\"active\""; } ?>><a href="judging.php">Judging</a></li>
             </ul>
         </div><!-- /.navbar-collapse -->

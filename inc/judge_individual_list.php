@@ -107,7 +107,7 @@
     ?>
     </tbody>
     </table>
-    The judging data for this user is saved on <a href="//meta.wikimedia.org/wiki/Wikipedia_Asian_Month/Judging/<?= $wiki ?>/<?= $username ?>">this meta-wiki page</a>.
+    The judging data for this user is saved on <a href="<?= str_replace(array("[wiki]", "[username]"), array($wiki, $username), $settings['judge_page_link_pattern']) ?>">this page</a>.
     <br>
     <button class="btn btn-default" data-toggle="modal" data-target="#add-art"><span class="glyphicon glyphicon-plus"></span> Add article to this list</button>
 </div>

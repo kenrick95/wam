@@ -3,6 +3,23 @@ date_default_timezone_set('UTC');
 header("Content-Type: text/html; charset=UTF-8");
 mb_internal_encoding("UTF-8");
 
+$settings['site_name'] = "Wikipedia Asian Month";
+$settings['main_page_link'] = "https://meta.wikimedia.org/wiki/Wikipedia_Asian_Month";
+$settings['talk_page_link'] = "https://meta.wikimedia.org/wiki/Talk:Wikipedia_Asian_Month";
+$settings['main_page_title'] = "Wikipedia_Asian_Month/2015_Edition";
+$settings['main_page_wiki'] = "meta.wikimedia.org";
+$settings['participant_list_page_link'] = "https://meta.wikimedia.org/wiki/Wikipedia_Asian_Month/Participants";
+$settings['participant_list_page_id'] = 9086071; // [[meta:Wikipedia_Asian_Month/Participants]]
+$settings['organizer_list_page_id'] = 8962039; // [[meta:Wikipedia_Asian_Month/Organizers]]
+
+$settings['judge_page_link_pattern'] = "//meta.wikimedia.org/wiki/Wikipedia_Asian_Month/Judging/[wiki]/[username]";
+$settings['judge_page_pattern'] = "Wikipedia Asian Month/Judging/[wiki]/[username]";
+
+$settings['judge_verdict_pattern'] = "/\* {{WAM\-art \| title = (.+) \| verdict = ([^|]*) \| last_updated_by = ([^|]*)( \| remarks = (.*) )?}}/";
+$settings['judge_verdict_wikitext_pattern'] = "* {{WAM-art | title = [page_title] | verdict = [verdict] | last_updated_by = [current_username] | remarks = [remarks] }}";
+
+$settings['judge_edit_summary_pattern'] = '[[Wikipedia Asian Month|WAM]]: Give [verdict] verdict on article [page_title] for user [username] of [wiki]';
+
 $settings['cookiefile'] = "cookies.tmp";
 $settings['period'] = [];
 $settings['period']['start'] = mktime(0, 0, 0, 11, 1, 2015);

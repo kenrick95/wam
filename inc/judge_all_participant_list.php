@@ -52,4 +52,4 @@ array_multisort($sort['wiki'], SORT_ASC, $sort['username'], SORT_ASC, $participa
 ?>
   </tbody>
 </table>
-<strong>Not listed?</strong> Add yourself in at <a href="https://meta.wikimedia.org/wiki/Wikipedia_Asian_Month/Participants">this meta-wiki page</a>.
+<strong>Not listed?</strong> Add yourself in at <a href="<?= $settings['participant_list_page_link'] ?>">this page</a>.
