@@ -41,7 +41,7 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : '';
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Wikipedia Asian Month - Judging<?php
+    <title><?= $settings['site_name']; ?> - Judging<?php
         if (!empty($pageid) && !empty($username) && !empty($wiki)) {
             $result = get_page_size([$pageid], $wiki)['query']['pages'];
             $article_title = $result[$pageid]['title'];
