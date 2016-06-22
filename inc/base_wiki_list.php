@@ -2,7 +2,14 @@
 <ol class="breadcrumb">
     <li><a href="<?= $__next_page; ?>.php">#</a></li>
 </ol>
-<ul>
+<table class="table datatable">
+<thead>
+    <tr>
+        <th>Wiki</th>
+        <th>Valid articles</th>
+    </tr>
+</thead>
+<tbody>
 <?php
     $sav = [];
     $wiki_list = [];
@@ -16,8 +23,16 @@
     sort($wiki_list);
     for ($i = 0; $i < count($wiki_list); $i++) {
     ?>
-    <li><a href="<?= $__next_page; ?>.php?filter=<?= $wiki_list[$i] ?>"><?= $wiki_list[$i] ?></a></li>
+    <tr>
+        <td>
+            <a href="<?= $__next_page; ?>.php?filter=<?= $wiki_list[$i] ?>"><?= $wiki_list[$i] ?></a>
+        </td>
+        <td>
+            <?php echo rand(); /* TODO */?>
+        </td>
+    </tr>
     <?php
     }
 ?>
-</ul>
+</tbody>
+</table>

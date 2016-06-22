@@ -8,6 +8,7 @@ $_current_page = "home";
     <meta charset="utf-8">
     <title><?= $settings['site_name']; ?></title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/u/bs/jq-2.2.3,dt-1.10.12,r-2.1.0/datatables.min.css"/>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>

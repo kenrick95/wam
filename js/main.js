@@ -1,4 +1,11 @@
 $(document).ready(function () {
+    $('.datatable').DataTable({
+        paging: false,
+        order: [[ 1, "desc" ]]
+    });
+
+    
+
     $(".check-wc").click(function () {
         $.ajax({
             url: "api/handler.php",

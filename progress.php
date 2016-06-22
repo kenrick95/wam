@@ -21,7 +21,9 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : '';
         ?></title>
 
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/u/bs/jq-2.2.3,dt-1.10.12,r-2.1.0/datatables.min.css"/>
     <link rel="stylesheet" href="css/style.css">
+ 
 </head>
 <body>
     <header>
