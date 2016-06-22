@@ -66,3 +66,6 @@ function str_replace_first($search, $replace, $subject) {
     }
     return $subject;
 }
+
+// Connect to database; $db now can be used globally
+$db = new mysqli($settings['db_host'], $settings['db_user'], $settings['db_pass'], $settings['db_name'], $settings['db_port']);

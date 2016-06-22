@@ -1,7 +1,7 @@
 <?php
 require_once("config.php");
 require_once("utils.php");
-
+require_once("cache-handler.php");
 
 function api_query ($params, $wiki = null) {
     global $settings;
@@ -106,7 +106,8 @@ function get_page_id ($title, $wiki = null) {
         "format" => "json",
         "titles" => $title
         );
-    return key(json_decode(api_query($params, $wiki), true)['query']['pages']);
+    $ret = json_decode(api_query($params, $wiki), true)['query']['pages'];
+    return is_null($ret) ? null : key($ret);
 }
 
 /**
@@ -127,9 +128,38 @@ function get_page_text_content ($pageids = [], $wiki = null) {
     return json_decode(api_query($params, $wiki), true);
 }
 
+function get_pages_wordcount ($pageids = [], $wiki = null) {
+    global $settings;
+    $wiki = isset($wiki) ? $wiki : $settings['main_page_wiki'];
+
+    $ret = [];
+    $cnt = 0;
+    while ($cnt * 50 < count($pageids)) {
+        $temp_pageids = array_slice($pageids, $cnt * 50, 50);
+        $cnt++;
+
+        $cache = get_page_wordcount_cache($temp_pageids, $wiki);
+
+        for ($i = 0; $i < count($cache); $i++) {
+            $ret[$cache[$i]['pageid']] = $cache[$i]['word_count'];
+
+            if(($del_key = array_search($cache[$i]['pageid'], $temp_pageids)) !== false) {
+                unset($temp_pageids[$del_key]);
+            }
+        }
+
+        foreach ($temp_pageids as $pageid) {
+            $ret[$pageid] = get_page_wordcount($pageid, $wiki);
+        }
+
+    }
+    return $ret;
+}
+
 function get_page_wordcount ($pageid, $wiki = null) {
     global $settings;
     $wiki = isset($wiki) ? $wiki : $settings['main_page_wiki'];
+
     $text = get_page_text_content([$pageid], $wiki)['query']['pages'][$pageid]['extract'];
     $enc = mb_detect_encoding($text, "UTF-8,ISO-8859-1");
     $text = iconv($enc, "UTF-8", $text);
@@ -152,6 +182,11 @@ function get_page_wordcount ($pageid, $wiki = null) {
         $regex = '/[\p{P}\p{Z}\p{S}\p{C}]+/u';
         $cnt = count(preg_split($regex, $text));
     }
+
+    $tmp = [];
+    $tmp[$pageid] = $cnt;
+    
+    save_page_wordcount_cache($tmp, $wiki);
 
     return $cnt;
 }
@@ -312,7 +347,7 @@ function get_organizers_list() {
  * @param string $url URL string
  * @param array $params Extra parameters for the Authorization header or post
  *  data (if application/x-www-form-urlencoded).
- *Â @return string Signature
+ * @return string Signature
  */
 function sign_request( $method, $url, $params = array() ) {
     global $settings;

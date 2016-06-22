@@ -99,6 +99,7 @@ $filter = isset($_GET['filter']) ? $_GET['filter'] : '';
                 array_push($all_pageids, $all_pages[$i]['pageid']);
             }
             $all_page_sizes = get_page_size($all_pageids, $wiki)['query']['pages'];
+            $all_wordcounts = get_pages_wordcount($all_pageids, $wiki);
 
             //echo json_encode($all_page_sizes);
             //echo json_encode($all_pages);

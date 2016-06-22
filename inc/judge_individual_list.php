@@ -5,13 +5,13 @@
     <li><a class="active" href="judging.php?username=<?= $username ?>&amp;wiki=<?= $wiki ?>"><?= $username; ?></a></li>
 </ol>
 <div class="table-responsive">
-    <table class="table">
+    <table class="table datatable">
     <thead>
         <tr>
         <th>Article name</th>
         <th>Date and time</th>
         <th>Current byte count</th>
-        <th>Approximate word count<br><button id="check-all-wc" class="btn btn-default btn-xs">Check all</button></th>
+        <th>Approximate word count<!--<br><button id="check-all-wc" class="btn btn-default btn-xs">Purge word count cache</button>--></th>
         <th>Verdict</th>
         <th>Remarks</th>
         <th>Checked by</th>
@@ -27,6 +27,11 @@
             } else {
                 $page_size = 0;
             }
+            if (isset($all_wordcounts[$all_pages[$i]['pageid']])) {
+                $wordcount = $all_wordcounts[$all_pages[$i]['pageid']];
+            } else {
+                $wordcount = 0;
+            }
 
             $status = isset($all_verdicts[$all_pages[$i]['title']])
                 ? $all_verdicts[$all_pages[$i]['title']]['verdict']
@@ -40,7 +45,7 @@
             <td><a href="//<?= $wiki ?>/wiki/<?= $all_pages[$i]['title'] ?>"><?= $all_pages[$i]['title'] ?></a></td>
             <td><?= date("j F Y, H:i:s", strtotime($all_pages[$i]['timestamp'])) ?> (created)</td>
             <td><?= $page_size ?></td>
-            <td><button class="btn btn-default check-wc btn-xs" data-status="<?= $status ?>" data-pageid="<?= $all_pages[$i]['pageid'] ?>" data-wiki="<?= $wiki ?>">Check word count</button></td>
+            <td><?= $wordcount; ?></td>
             <td><!-- <?= $all_pages[$i]['pageid'] ?> --><?php
             if ($status === "yes") { ?>
                 <span class="label label-success">Yes</span>
@@ -70,10 +75,14 @@
             }
         }
         $newer_page_sizes = get_page_size($newer_pageids, $wiki)['query']['pages'];
-        if (count($newer_page_sizes) === 0) {
+        if (count($newer_page_sizes) > 0) {
           $newer_page_sizes = array();
         }
         foreach ($newer_page_sizes as $page_id => $data) {
+            if (!array_key_exists('revisions', $data)) {
+                continue;
+            }
+
           $page_size = $data['revisions'][0]['size'];
             $status = !empty($all_verdicts[$data['title']])
                 ? $all_verdicts[$data['title']]['verdict']
@@ -87,7 +96,7 @@
             <td><?= date("j F Y, H:i:s", strtotime($data['revisions'][0]['timestamp'])) ?> (last edited)</td>
             <td><?= $page_size ?></td>
             <td><button class="btn btn-default check-wc btn-xs" data-status="<?= $status ?>" data-pageid="<?= $data['pageid'] ?>" data-wiki="<?= $wiki ?>">Check word count</button></td>
-            <td><!-- <?= $data['pageid'] ?> --><?php
+            <td><?php
             if ($status === "yes") { ?>
                 <span class="label label-success">Yes</span>
             <?php } else if ($status === "pending") { ?>
