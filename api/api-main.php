@@ -589,6 +589,8 @@ function get_verdict($username, $wiki = null) {
     $judge_page = str_replace(array("[wiki]", "[username]"), array($wiki, $username), $settings['judge_page_pattern']);
     
     $res = get_page_content_using_title($judge_page)['query']['pages'];
+    if (!$res)
+        return false;
     $judge_page_id = key($res);
     if ($judge_page_id < 0)
         return false;
@@ -717,6 +719,41 @@ function get_user_registration_date($username, $wiki = null) {
         );
     return json_decode(api_query($params, $wiki), true)['query']['users'];
 }
+function get_users_stats($usernames = [], $wiki = null) {
+    global $settings;
+    $wiki = isset($wiki) ? $wiki : $settings['main_page_wiki'];
+
+    $ret = [];
+    $cnt = 0;
+    while ($cnt * 50 < count($usernames)) {
+        $temp_usernames = array_slice($usernames, $cnt * 50, 50);
+        $cnt++;
+
+        $cache = get_user_stats_cache($temp_usernames, $wiki);
+        $cache_usernames = [];
+
+        for ($i = 0; $i < count($cache); $i++) {
+            $ret[$cache[$i]['username']] = array(
+                'all'     => $cache[$i]['art_count'],
+                'pending' => $cache[$i]['pending_art'],
+                'yes'     => $cache[$i]['valid_art'],
+                'no'      => $cache[$i]['invalid_art']
+            );
+
+            array_push($cache_usernames, $cache[$i]['username']);
+        }
+        $temp_usernames = array_diff($temp_usernames, $cache_usernames);
+
+        foreach ($temp_usernames as $username) {
+            $ret[$username] = get_user_stats($username, $wiki);
+        }
+
+    }
+    return $ret;
+
+}
+
+
 function get_user_stats($username, $wiki = null) {
   global $settings;
   $wiki = isset($wiki) ? $wiki : $settings['main_page_wiki'];
@@ -767,6 +804,15 @@ function get_user_stats($username, $wiki = null) {
   }
 
   $cnt['all'] = $cnt['yes'] + $cnt['no'] + $cnt['pending'];
+
+  save_user_stats_cache(array(
+      $username => array(
+            'art_count'  => $cnt['all'],
+            'pending_art' => $cnt['pending'],
+            'valid_art'   => $cnt['yes'],
+            'invalid_art' => $cnt['no']
+      )
+  ), $wiki);
 
   return $cnt;
 }
