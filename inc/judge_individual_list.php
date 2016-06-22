@@ -62,9 +62,11 @@
         }
 
         $newer_pageids = [];
-        foreach ($all_verdicts as $page_title => $data) {
-            if (!isset($page_shown[$page_title])) {
-                array_push($newer_pageids, get_page_id($page_title, $wiki));
+        if ($all_verdicts) {
+            foreach ($all_verdicts as $page_title => $data) {
+                if (!isset($page_shown[$page_title])) {
+                    array_push($newer_pageids, get_page_id($page_title, $wiki));
+                }
             }
         }
         $newer_page_sizes = get_page_size($newer_pageids, $wiki)['query']['pages'];
