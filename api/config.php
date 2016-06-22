@@ -4,7 +4,7 @@ header("Content-Type: text/html; charset=UTF-8");
 mb_internal_encoding("UTF-8");
 
 $settings['site_name'] = "Wikipedia Asian Month";
-$settings['main_page_link'] = "https://meta.wikimedia.org/wiki/Wikipedia_Asian_Month";
+$settings['main_page_link'] = "https://meta.wikimedia.org/wiki/Wikipedia_Asian_Month/2015_Edition";
 $settings['talk_page_link'] = "https://meta.wikimedia.org/wiki/Talk:Wikipedia_Asian_Month";
 $settings['main_page_title'] = "Wikipedia_Asian_Month/2015_Edition";
 $settings['main_page_wiki'] = "meta.wikimedia.org";

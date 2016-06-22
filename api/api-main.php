@@ -229,6 +229,7 @@ function get_main_page () {
 function get_page_content_html ($title, $wiki = null) {
     global $settings;
     $wiki = isset($wiki) ? $wiki : $settings['main_page_wiki'];
+    $title = str_replace(" ", "_", $title);
     $title = rawurlencode($title);
     $url = "https://$wiki/api/rest_v1/page/html/$title";
     $params = "";
@@ -238,6 +239,7 @@ function get_page_content_html ($title, $wiki = null) {
     }
 
     preg_match_all("/<body[^>]*>(.*?)<\/body>/is", $raw_data, $data);
+
     $data = $data[1][0];
     $data = str_replace("./", "//$wiki/wiki/", $data);
 
